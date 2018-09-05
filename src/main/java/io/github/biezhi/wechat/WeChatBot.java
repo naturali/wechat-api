@@ -2,6 +2,8 @@ package io.github.biezhi.wechat;
 
 import io.github.biezhi.wechat.api.WeChatApi;
 import io.github.biezhi.wechat.api.WeChatApiImpl;
+import io.github.biezhi.wechat.api.WeChatAuthApi;
+import io.github.biezhi.wechat.api.WeChatAuthApiImpl;
 import io.github.biezhi.wechat.api.annotation.Bind;
 import io.github.biezhi.wechat.api.client.BotClient;
 import io.github.biezhi.wechat.api.constant.Config;
@@ -36,6 +38,7 @@ public class WeChatBot {
      * 操作微信接口的API
      */
     private WeChatApi api;
+    private WeChatAuthApi authApi;
 
     /**
      * 调用HTTP请求的客户端
@@ -255,7 +258,9 @@ public class WeChatBot {
      */
     public void start() {
         this.api = new WeChatApiImpl(this);
+        this.authApi = new WeChatAuthApiImpl(this);
         log.info("wechat-bot: {}", Constant.VERSION);
+        authApi.login(config.autoLogin());
         api.login(config.autoLogin());
 
         Thread msgHandle = new Thread(new Runnable() {
