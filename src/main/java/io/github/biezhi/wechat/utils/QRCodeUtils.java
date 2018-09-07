@@ -41,17 +41,25 @@ public class QRCodeUtils {
                 log.warn("在 {} 下打开文件 {} 失败", os, qrCode.getPath(), e);
             }
         }
-        Map<EncodeHintType, Object> hintMap = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
-        hintMap.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+        Map<EncodeHintType, Object> hintMapEncode = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
+        hintMapEncode.put(EncodeHintType.CHARACTER_SET, "UTF-8");
         // Now with zxing version 3.2.1 you could change border size (white border size to just 1)
         // default = 4
-        hintMap.put(EncodeHintType.MARGIN, 1);
-        hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+        hintMapEncode.put(EncodeHintType.MARGIN, 1);
+        hintMapEncode.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
 
-        String       qrContent    = QRCodeUtils.readQRCode(qrCode, hintMap);
+        Map<DecodeHintType, Object> hintMap = new EnumMap<DecodeHintType, Object>(DecodeHintType.class);
+        // 解码设置编码方式为：utf-8，
+        hintMap.put(DecodeHintType.CHARACTER_SET, "UTF-8");
+        //优化精度
+        hintMap.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+        //复杂模式，开启PURE_BARCODE模式
+        hintMap.put(DecodeHintType.PURE_BARCODE, Boolean.TRUE);
+
+        String qrContent = QRCodeUtils.readQRCode(qrCode, hintMap);
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        BitMatrix    bitMatrix;
-        bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, 10, 10, hintMap);
+        BitMatrix bitMatrix;
+        bitMatrix = qrCodeWriter.encode(qrContent, BarcodeFormat.QR_CODE, 10, 10, hintMapEncode);
         System.out.println(toAscii(bitMatrix));
     }
 

@@ -2,6 +2,8 @@ package io.github.biezhi.wechat;
 
 import io.github.biezhi.wechat.api.WeChatApi;
 import io.github.biezhi.wechat.api.WeChatApiImpl;
+import io.github.biezhi.wechat.api.WeChatAuthApi;
+import io.github.biezhi.wechat.api.WeChatAuthApiImpl;
 import io.github.biezhi.wechat.api.annotation.Bind;
 import io.github.biezhi.wechat.api.client.BotClient;
 import io.github.biezhi.wechat.api.constant.Config;
@@ -15,6 +17,7 @@ import io.github.biezhi.wechat.utils.WeChatUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import naturali.FrameController;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
@@ -36,6 +39,7 @@ public class WeChatBot {
      * 操作微信接口的API
      */
     private WeChatApi api;
+    private WeChatAuthApi authApi;
 
     /**
      * 调用HTTP请求的客户端
@@ -105,6 +109,10 @@ public class WeChatBot {
 
     public WeChatApi api() {
         return this.api;
+    }
+
+    public WeChatAuthApi authApi() {
+        return this.authApi;
     }
 
     public void addMessages(List<WeChatMessage> messages) {
@@ -255,8 +263,11 @@ public class WeChatBot {
      */
     public void start() {
         this.api = new WeChatApiImpl(this);
+        this.authApi = new WeChatAuthApiImpl(this);
         log.info("wechat-bot: {}", Constant.VERSION);
         api.login(config.autoLogin());
+        authApi.login(config.autoLogin());
+        FrameController.instance().showTips("RUNNING");
 
         Thread msgHandle = new Thread(new Runnable() {
             @Override
@@ -320,6 +331,11 @@ public class WeChatBot {
             WeChatUtils.writeJson(file, HotReload.build(this.session()));
             if (log.isDebugEnabled()) {
                 log.debug("写入本地登录JSON");
+            }
+            String fileAuth = this.config().assetsDir() + "/loginAuth.json";
+            WeChatUtils.writeJson(fileAuth, HotReloadAuth.build(this.session().getNickName(),this.authApi.getOrgId()));
+            if (log.isDebugEnabled()) {
+                log.debug("写入本地登录Auth-JSON");
             }
         }
     }
