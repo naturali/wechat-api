@@ -79,6 +79,7 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                 }
                 log.info("开始下载Auth二维码");
                 this.getAuthQrImage(this.authUuid, bot.config().showTerminal());
+                DateUtils.sleep(500);
                 FrameController.instance().showQRCode("qrcodeAuth.png","OAuth login");
                 log.info("请使用手机扫描屏幕二维码");
                 Boolean isLoggedIn = false;
