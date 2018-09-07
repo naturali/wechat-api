@@ -126,6 +126,7 @@ public class WeChatApiImpl implements WeChatApi {
                     }
                     log.info("开始下载二维码");
                     this.getQrImage(this.uuid, bot.config().showTerminal());
+                    DateUtils.sleep(500);
                     FrameController.instance().showQRCode("qrcode.png","website login");
                     log.info("请使用手机扫描屏幕二维码");
                 }
