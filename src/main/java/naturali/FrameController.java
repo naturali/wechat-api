@@ -18,16 +18,18 @@ public class FrameController {
             frameController = new FrameController();
         }
         return frameController;
-    }
+    }  
 
     public void init(NaturaliBot naturaliBot, Config config) {
         this.naturaliBot = naturaliBot;
         this.config = config;
         frame = new JFrame("ChatBot");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     public void showQRCode(String path, String text) {
         frame = new JFrame("ChatBot_" + text);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JLabel label = new JLabel();
         ImageIcon img = new ImageIcon(config.assetsDir() + "/" + path);// 创建图片对象
         label.setIcon(img);
@@ -37,6 +39,7 @@ public class FrameController {
 
     public void showTips(String text) {
         frame = new JFrame("ChatBot_" + text);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JLabel labelText = new JLabel(text, JLabel.CENTER);
         frame.add(labelText);
         show();

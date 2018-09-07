@@ -179,7 +179,7 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
         StringRequest request = new StringRequest(baseUrl)
                 .add("uuid", authUuid)
                 .add("_", time)
-                .timeout(60);
+                .timeout(50);
         if (isLast404) {
             request.add("last", "404");
         }

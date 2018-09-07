@@ -228,7 +228,7 @@ public class WeChatApiImpl implements WeChatApi {
                 .add("loginicon", true).add("uuid", uid)
                 .add("tip", "1").add("_", time)
                 .add("r", (int) (-time / 1000) / 1579)
-                .timeout(30));
+                .timeout(50));
 
         Matcher matcher = CHECK_LOGIN_PATTERN.matcher(response.getRawBody());
         if (matcher.find()) {

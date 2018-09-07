@@ -44,15 +44,23 @@ public class NaturaliBot extends WeChatBot {
         if (isStrEpmty(this.session().getNickName()) || isStrEpmty(this.session().getNickName())) {
             canWork = false;
             System.out.printf("website登陆失败");
+            FrameController.instance().showTips("website登陆失败");
+            return;
         }
-        if (isStrEpmty(this.authApi().getAuthCode())) {
-            canWork = false;
-            System.out.printf("Oauth登陆失败");
-        }
-        this.authApi().setOrgId(getOrgId());
         if (isStrEpmty(this.authApi().getOrgId())) {
-            canWork = false;
-            System.out.printf("没有获取到所属organization");
+            if (isStrEpmty(this.authApi().getAuthCode())) {
+                canWork = false;
+                System.out.printf("OAuth登陆失败");
+                FrameController.instance().showTips("OAuth登陆失败");
+                return;
+            }
+            this.authApi().setOrgId(getOrgId());//获取orgid兼检测后台运行状况
+            if (isStrEpmty(this.authApi().getOrgId())) {
+                canWork = false;
+                System.out.printf("未获取到所属organization");
+                FrameController.instance().showTips("未获取到所属organization\n\n请检查后台是否连通,或检测您是否已注册为公司成员");
+                return;
+            }
         }
         while (canWork) {
             request();
@@ -70,8 +78,8 @@ public class NaturaliBot extends WeChatBot {
     /*GRPC with gateway start*/
     private static ManagedChannel channel;
     private static ChatBotGatewayGrpc.ChatBotGatewayBlockingStub blockingStub;
-    private static String GATEWAY_HOST = "127.0.0.1";
-    private static int GATEWAY_PORT = 40002;
+    private static String GATEWAY_HOST = "47.94.181.104";
+    private static int GATEWAY_PORT = 31934;
 
     public static void initGrpc(String host, int port) {
         channel = ManagedChannelBuilder.forAddress(host, port)
@@ -130,7 +138,6 @@ public class NaturaliBot extends WeChatBot {
         try {
             Wechatwebsite.Reply reply = blockingStub.getOrgId(baseInfo);
             shutdown();
-            System.out.println("………………………………………………………………………………" + reply);
             return reply.getMsg();
         } catch (Exception e) {
             e.printStackTrace();
