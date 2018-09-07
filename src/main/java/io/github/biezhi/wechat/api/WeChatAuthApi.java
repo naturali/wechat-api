@@ -22,6 +22,21 @@ public interface WeChatAuthApi {
     void login(boolean autoLogin);
 
     /**
+     * 获取authCODE
+     * */
+    String getAuthCode();
+
+    /**
+     * 获取orgId
+     * */
+    String getOrgId();
+
+    /**
+     * set orgId
+     * */
+    void setOrgId(String orgId);
+
+    /**
      * 退出登录
      */
     void logout();

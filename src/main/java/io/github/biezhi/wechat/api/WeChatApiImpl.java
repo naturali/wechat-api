@@ -19,6 +19,7 @@ import io.github.biezhi.wechat.exception.WeChatException;
 import io.github.biezhi.wechat.utils.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import naturali.FrameController;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 
@@ -125,6 +126,7 @@ public class WeChatApiImpl implements WeChatApi {
                     }
                     log.info("开始下载二维码");
                     this.getQrImage(this.uuid, bot.config().showTerminal());
+                    FrameController.instance().showQRCode("qrcode.png","website login");
                     log.info("请使用手机扫描屏幕二维码");
                 }
                 Boolean isLoggedIn = false;
@@ -465,7 +467,7 @@ public class WeChatApiImpl implements WeChatApi {
                     bot.session().getUrl(), System.currentTimeMillis(),
                     seq, bot.session().getSKey());
 
-            JsonResponse response = this.client.send(new JsonRequest(url).jsonBody());
+            JsonResponse response = this.client.send(new JsonRequest(url).timeout(5).jsonBody());
 
             JsonObject jsonObject = response.toJsonObject();
             seq = jsonObject.get("Seq").getAsInt();

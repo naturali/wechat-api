@@ -10,6 +10,7 @@ import io.github.biezhi.wechat.api.request.StringRequest;
 import io.github.biezhi.wechat.api.response.*;
 import io.github.biezhi.wechat.utils.*;
 import lombok.extern.slf4j.Slf4j;
+import naturali.FrameController;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,16 +30,18 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
 
     private static final Pattern CHECK_LOGIN_PATTERN = Pattern.compile("window.wx_errcode=(\\d+);window.wx_code=\'(\\S*)\';");
     private String authUuid;
-    private String authCode;
+    private String authCode = "";
+    private String orgId = "";
     private boolean authLogging;
     private WeChatBot bot;
     private BotClient client;
 
-//    private String appID="wxb82cc0701446acde";
+    //    private String appID="wxb82cc0701446acde";
 //    private String redirectUri="https%3A%2F%2Fdeveloper.naturali.io%2Fwechat-auth";
-    private String appID="wx28fca7046cf95cad";
-    private String appSecret="897d31c95985ec2e08c0f767244d1937";
-    private String redirectUri="https%3A%2F%2Fni-skill-lab-dev.naturali.io";
+    private String appID = "wx28fca7046cf95cad";
+    private String appSecret = "897d31c95985ec2e08c0f767244d1937";
+    private String redirectUri = "https%3A%2F%2Fni-skill-lab-dev.naturali.io";
+
     public WeChatAuthApiImpl(WeChatBot bot) {
         this.bot = bot;
         this.client = bot.client();
@@ -50,8 +53,10 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
     private void autoLogin() {
         String file = bot.config().assetsDir() + "/loginAuth.json";
         try {
-            HotReload hotReload = WeChatUtils.fromJson(new FileReader(file), HotReload.class);
-            hotReload.reLogin(bot);
+            HotReloadAuth hotReloadAuth = WeChatUtils.fromJson(new FileReader(file), HotReloadAuth.class);
+            if (!hotReloadAuth.reLogin(bot)) {
+                this.login(false);
+            }
         } catch (FileNotFoundException e) {
             this.login(false);
         }
@@ -64,8 +69,7 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
             log.warn("微信Auth已经登录");
             return;
         }
-        if (false) {
-//        if (autoLogin) {
+        if (autoLogin) {
             this.autoLogin();
         } else {
             this.authLogging = true;
@@ -75,6 +79,7 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                 }
                 log.info("开始下载Auth二维码");
                 this.getAuthQrImage(this.authUuid, bot.config().showTerminal());
+                FrameController.instance().showQRCode("qrcodeAuth.png","OAuth login");
                 log.info("请使用手机扫描屏幕二维码");
                 Boolean isLoggedIn = false;
                 Boolean isLast404 = false;
@@ -127,7 +132,8 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                 .add("login_type", "jssdk")
                 .add("self_redirect", "false")
                 .add("style", "white")
-                .add("href", "https://ni-web.oss-cn-beijing.aliyuncs.com/static/wx_reset.css"));
+                .add("href", "https://ni-web.oss-cn-beijing.aliyuncs.com/static/wx_reset.css")
+                .timeout(30));
         String body = response.getRawBody();
         int k = body.indexOf("/connect/qrcode/");
         if (k < 10) {
@@ -173,7 +179,7 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
         StringRequest request = new StringRequest(baseUrl)
                 .add("uuid", authUuid)
                 .add("_", time)
-                .timeout(30);
+                .timeout(60);
         if (isLast404) {
             request.add("last", "404");
         }
@@ -199,6 +205,21 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                 .add("grant_type", "authorization_code"));
         System.out.println("^^^^^^^^^^^" + apiResponse.getRawBody());
         return apiResponse.getString("unionid");
+    }
+
+    @Override
+    public String getAuthCode() {
+        return authCode;
+    }
+
+    @Override
+    public String getOrgId() {
+        return this.orgId;
+    }
+
+    @Override
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
     }
 
     @Override

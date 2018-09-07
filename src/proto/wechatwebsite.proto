@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package websitegateway;
+
+// wechat website with gate way
+service ChatBotGateway {
+    rpc ReportMessage(Message) returns (Reply);
+    rpc RequestMessage(BaseInfo) returns (Message);//for 轮询
+    rpc SendClientMessage (Message) returns (Reply);
+    rpc GetOrgId (BaseInfo) returns (Reply);
+}
+
+message Message {
+    ChatType chatType = 1;
+    MsgType msgType = 2;
+    string mineUserName = 3;
+    string mineNickName = 4;
+    string text = 5;
+    string chatUserName = 6;
+    string chatNickName = 7;
+    string orgId = 8;
+
+    enum ChatType {
+        RECEIVE = 0;
+        SEND = 1;
+    }
+    enum MsgType {
+        ALL = 0;
+        TEXT = 1;
+        IMAGE = 2;
+        EMOTICONS = 3;
+        VOICE = 4;
+        VIDEO = 5;
+        PERSON_CARD = 6;
+        SYSTEM = 7;
+        ADD_FRIEND = 8;
+        REVOKE_MSG = 9;
+        SHARE = 10;
+        CONTACT_INIT = 11;
+        UNKNOWN = 12;
+    }
+}
+
+message BaseInfo {
+    string mineUserName = 1;
+    string mineNickName = 2;
+    string orgId = 3;
+    string authCode = 4;
+}
+
+message Reply {
+    bool status = 1;
+    string msg = 2;
+}
+

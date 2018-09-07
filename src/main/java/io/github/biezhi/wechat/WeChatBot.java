@@ -17,6 +17,7 @@ import io.github.biezhi.wechat.utils.WeChatUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import naturali.FrameController;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 
@@ -108,6 +109,10 @@ public class WeChatBot {
 
     public WeChatApi api() {
         return this.api;
+    }
+
+    public WeChatAuthApi authApi() {
+        return this.authApi;
     }
 
     public void addMessages(List<WeChatMessage> messages) {
@@ -260,8 +265,9 @@ public class WeChatBot {
         this.api = new WeChatApiImpl(this);
         this.authApi = new WeChatAuthApiImpl(this);
         log.info("wechat-bot: {}", Constant.VERSION);
-        authApi.login(config.autoLogin());
         api.login(config.autoLogin());
+        authApi.login(config.autoLogin());
+        FrameController.instance().showTips("RUNNING");
 
         Thread msgHandle = new Thread(new Runnable() {
             @Override
@@ -325,6 +331,11 @@ public class WeChatBot {
             WeChatUtils.writeJson(file, HotReload.build(this.session()));
             if (log.isDebugEnabled()) {
                 log.debug("写入本地登录JSON");
+            }
+            String fileAuth = this.config().assetsDir() + "/loginAuth.json";
+            WeChatUtils.writeJson(fileAuth, HotReloadAuth.build(this.session().getNickName(),this.authApi.getOrgId()));
+            if (log.isDebugEnabled()) {
+                log.debug("写入本地登录Auth-JSON");
             }
         }
     }
