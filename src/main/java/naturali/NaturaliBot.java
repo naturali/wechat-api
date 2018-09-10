@@ -30,7 +30,7 @@ public class NaturaliBot extends WeChatBot {
     @Bind(msgType = MsgType.TEXT)
     public void handleText(WeChatMessage message) {
         System.out.printf("接收到 [{%s}] 的消息: {%s}", message.getName(), message.getText());
-        FrameController.instance().showTips("接收到 [" + message.getName() + "] 的消息: " + message.getText() + "}");
+        FrameController.instance().showTips("接收到 [" + message.getName() + "] 的消息: {" + message.getText() + "}");
         if (StringUtils.isNotEmpty(message.getName())) {
             this.sendMsg(message.getFromUserName(), "自动回复: " + message.getText());
         } else {
@@ -59,12 +59,12 @@ public class NaturaliBot extends WeChatBot {
                 return;
             }
             this.authApi().setOrgId(getOrgId());//获取orgid兼检测后台运行状况
-            if (isStrEpmty(this.authApi().getOrgId())) {
-                canWork = false;
-                System.out.printf("未获取到所属organization");
-                FrameController.instance().showTips("未获取到所属organization\n\n请检查后台是否连通,或检测您是否已注册为公司成员");
-                return;
-            }
+//            if (isStrEpmty(this.authApi().getOrgId())) {
+//                canWork = false;
+//                System.out.printf("未获取到所属organization");
+//                FrameController.instance().showTips("未获取到所属organization\n\n请检查后台是否连通,或检测您是否已注册为公司成员");
+//                return;
+//            }
         }
         while (canWork) {
             request();
@@ -82,10 +82,10 @@ public class NaturaliBot extends WeChatBot {
     /*GRPC with gateway start*/
     private static ManagedChannel channel;
     private static ChatbotGatewayGrpc.ChatbotGatewayBlockingStub blockingStub;
-//    private static String GATEWAY_HOST = "47.94.181.104";
-//    private static int GATEWAY_PORT = 31934;
-    private static String GATEWAY_HOST = "127.0.0.1";
-    private static int GATEWAY_PORT = 40002;
+    private static String GATEWAY_HOST = "47.94.181.104";
+    private static int GATEWAY_PORT = 31934;
+//    private static String GATEWAY_HOST = "127.0.0.1";
+//    private static int GATEWAY_PORT = 40002;
 
     public static void initGrpc(String host, int port) {
         channel = ManagedChannelBuilder.forAddress(host, port)
@@ -128,8 +128,10 @@ public class NaturaliBot extends WeChatBot {
         try {
             Wechatwebsite.Message response = blockingStub.requestMessage(baseInfo);
             shutdown();
-            FrameController.instance().showTips("发送给 [" + response.getChatNickName() + "] 的消息: " + response.getText() + "}");
-            this.sendMsg(response.getChatUserName(), response.getText());
+            if (response.getText() != null && response.getText() != "") {
+                FrameController.instance().showTips("发送给 [" + response.getChatNickName() + "] 的消息: {" + response.getText() + "}");
+                this.sendMsg(response.getChatUserName(), response.getText());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
