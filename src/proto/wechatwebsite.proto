@@ -3,7 +3,7 @@ syntax = "proto3";
 package websitegateway;
 
 // wechat website with gate way
-service ChatBotGateway {
+service ChatbotGateway {
     rpc ReportMessage(Message) returns (Reply);
     rpc RequestMessage(BaseInfo) returns (Message);//for 轮询
     rpc SendClientMessage (Message) returns (Reply);

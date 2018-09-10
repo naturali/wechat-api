@@ -80,10 +80,11 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                 log.info("开始下载Auth二维码");
                 this.getAuthQrImage(this.authUuid, bot.config().showTerminal());
                 DateUtils.sleep(500);
-                FrameController.instance().showQRCode("qrcodeAuth.png","OAuth login");
+                FrameController.instance().showQRCode("qrcodeAuth.png", "OAuth login");
                 log.info("请使用手机扫描屏幕二维码");
                 Boolean isLoggedIn = false;
                 Boolean isLast404 = false;
+                int count404 = 0;
                 while (null == isLoggedIn || !isLoggedIn) {
                     String status = this.checkLogin(this.authUuid, isLast404);
                     if (AuthStateCode.SUCCESS.equals(status)) {
@@ -94,16 +95,17 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                             log.info("请在手机上确认登录");
                             isLoggedIn = null;
                         }
-                    } else if (AuthStateCode.FAIL.equals(status)) {
+                    } else if (AuthStateCode.FAIL.equals(status) && count404 < 2) {
                         isLast404 = true;
+                        count404++;
                         if (null != isLoggedIn) {
                             log.info("请在手机上确认登录");
                             isLoggedIn = null;
                         }
-                    } else if (AuthStateCode.TIMEOUT.equals(status)) {
+                    } else if (AuthStateCode.TIMEOUT.equals(status) || AuthStateCode.FAIL.equals(status)) {
                         break;
                     }
-                    DateUtils.sleep(1000);
+                    DateUtils.sleep(300);
                 }
                 if (null != isLoggedIn && isLoggedIn) {
                     break;

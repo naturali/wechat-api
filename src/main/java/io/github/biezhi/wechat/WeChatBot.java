@@ -266,6 +266,7 @@ public class WeChatBot {
         this.authApi = new WeChatAuthApiImpl(this);
         log.info("wechat-bot: {}", Constant.VERSION);
         api.login(config.autoLogin());
+        FrameController.instance().showTips("请稍等");
         authApi.login(config.autoLogin());
         FrameController.instance().showTips("RUNNING");
 

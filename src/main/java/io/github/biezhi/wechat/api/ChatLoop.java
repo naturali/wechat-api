@@ -5,6 +5,7 @@ import io.github.biezhi.wechat.api.model.SyncCheckRet;
 import io.github.biezhi.wechat.api.response.WebSyncResponse;
 import io.github.biezhi.wechat.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
+import naturali.FrameController;
 
 import static io.github.biezhi.wechat.api.enums.RetCode.*;
 
@@ -28,17 +29,24 @@ public class ChatLoop implements Runnable {
 
     @Override
     public void run() {
-        while (bot.isRunning()) {
+        while (bot.isRunning() ) {
+            if (bot.authApi().getOrgId()==null||bot.authApi().getOrgId()==""){
+                DateUtils.sleep(1000);
+                continue;
+            }
             try {
                 SyncCheckRet syncCheckRet = api.syncCheck();
                 if (syncCheckRet.getRetCode() == UNKNOWN) {
+                    FrameController.instance().showTips("未知状态");
                     log.info("未知状态");
                     continue;
                 } else if (syncCheckRet.getRetCode() == MOBILE_LOGIN_OUT) {
+                    FrameController.instance().showTips("你在手机上登出了微信，再见");
                     log.info("你在手机上登出了微信，再见");
                     api.logout();
                     break;
                 } else if (syncCheckRet.getRetCode() == LOGIN_OTHERWISE) {
+                    FrameController.instance().showTips("你在其他地方登录了 WEB 版微信，再见");
                     log.info("你在其他地方登录了 WEB 版微信，再见");
                     api.logout();
                     break;
