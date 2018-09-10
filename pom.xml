@@ -19,7 +19,7 @@
         <!--<grpc.version>1.11.0</grpc.version>-->
         <!--<protobuf.version>3.5.1</protobuf.version>-->
     </properties>
-    
+
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -116,6 +116,30 @@
             </extension>
         </extensions>
         <plugins>
+            <!--打jar包-->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>naturali.NaturaliBot</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <!--用于根据proto文件生成java类的插件-->
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>

@@ -441,18 +441,19 @@ public class WeChatApiImpl implements WeChatApi {
      */
     @Override
     public void logout() {
-        if (bot.isRunning()) {
-            String url = String.format("%s/webwxlogout", bot.session().getUrl());
-            this.client.send(new StringRequest(url)
-                    .add("redirect", 1)
-                    .add("type", 1)
-                    .add("sKey", bot.session().getSKey()));
-            bot.setRunning(false);
-        }
-        this.logging = false;
-        this.client.cookies().clear();
-        String file = bot.config().assetsDir() + "/login.json";
-        new File(file).delete();
+        bot.api().login(true);
+//        if (bot.isRunning()) {
+//            String url = String.format("%s/webwxlogout", bot.session().getUrl());
+//            this.client.send(new StringRequest(url)
+//                    .add("redirect", 1)
+//                    .add("type", 1)
+//                    .add("sKey", bot.session().getSKey()));
+//            bot.setRunning(false);
+//        }
+//        this.logging = false;
+//        this.client.cookies().clear();
+//        String file = bot.config().assetsDir() + "/login.json";
+//        new File(file).delete();
     }
 
     /**

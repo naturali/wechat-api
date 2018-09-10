@@ -14,7 +14,7 @@ import io.github.biezhi.wechat.utils.DateUtils;
 import io.github.biezhi.wechat.utils.StringUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import websitegateway.ChatBotGatewayGrpc;
+import websitegateway.ChatbotGatewayGrpc;
 import websitegateway.Wechatwebsite;
 
 import java.util.concurrent.TimeUnit;
@@ -29,11 +29,15 @@ public class NaturaliBot extends WeChatBot {
 
     @Bind(msgType = MsgType.TEXT)
     public void handleText(WeChatMessage message) {
+        System.out.printf("接收到 [{%s}] 的消息: {%s}", message.getName(), message.getText());
+        FrameController.instance().showTips("接收到 [" + message.getName() + "] 的消息: " + message.getText() + "}");
         if (StringUtils.isNotEmpty(message.getName())) {
-            System.out.printf("接收到 [{%s}] 的消息: {%s}", message.getName(), message.getText());
             this.sendMsg(message.getFromUserName(), "自动回复: " + message.getText());
-            report(message);
+        } else {
+            this.sendMsg(message.getFromUserName(), "自动回复new add: " + message.getText());
         }
+        report(message);
+
     }
 
 
@@ -77,16 +81,18 @@ public class NaturaliBot extends WeChatBot {
 
     /*GRPC with gateway start*/
     private static ManagedChannel channel;
-    private static ChatBotGatewayGrpc.ChatBotGatewayBlockingStub blockingStub;
-    private static String GATEWAY_HOST = "47.94.181.104";
-    private static int GATEWAY_PORT = 31934;
+    private static ChatbotGatewayGrpc.ChatbotGatewayBlockingStub blockingStub;
+//    private static String GATEWAY_HOST = "47.94.181.104";
+//    private static int GATEWAY_PORT = 31934;
+    private static String GATEWAY_HOST = "127.0.0.1";
+    private static int GATEWAY_PORT = 40002;
 
     public static void initGrpc(String host, int port) {
         channel = ManagedChannelBuilder.forAddress(host, port)
                 .usePlaintext(true)
                 .build();
 
-        blockingStub = ChatBotGatewayGrpc.newBlockingStub(channel);
+        blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
     }
 
     public void shutdown() throws InterruptedException {
@@ -122,6 +128,7 @@ public class NaturaliBot extends WeChatBot {
         try {
             Wechatwebsite.Message response = blockingStub.requestMessage(baseInfo);
             shutdown();
+            FrameController.instance().showTips("发送给 [" + response.getChatNickName() + "] 的消息: " + response.getText() + "}");
             this.sendMsg(response.getChatUserName(), response.getText());
         } catch (Exception e) {
             e.printStackTrace();
@@ -147,8 +154,9 @@ public class NaturaliBot extends WeChatBot {
 
     public static void main(String[] args) {
         Config config = Config.me();
-        NaturaliBot helloBot = new NaturaliBot(config.autoLogin(true).showTerminal(true));
+        NaturaliBot helloBot = new NaturaliBot(config.autoLogin(false).showTerminal(true));
         FrameController.instance().init(helloBot, config);
+        FrameController.instance().showTips("initializing");
         helloBot.start();
     }
 

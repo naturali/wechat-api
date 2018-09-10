@@ -3,7 +3,7 @@ package naturali;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
-import websitegateway.ChatBotGatewayGrpc;
+import websitegateway.ChatbotGatewayGrpc;
 import websitegateway.Wechatwebsite;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class TestServer {
     }
 
     // 实现 定义一个实现服务接口的类
-    private class GreeterImpl extends ChatBotGatewayGrpc.ChatBotGatewayImplBase {
+    private class GreeterImpl extends ChatbotGatewayGrpc.ChatbotGatewayImplBase {
         @Override
         public void reportMessage(Wechatwebsite.Message request, StreamObserver<Wechatwebsite.Reply> responseObserver) {
             System.out.printf("@@@@@@@@@@@@reportMessage");

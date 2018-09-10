@@ -14,7 +14,7 @@ import io.github.biezhi.wechat.api.model.WeChatMessage;
 import io.github.biezhi.wechat.utils.StringUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import websitegateway.ChatBotGatewayGrpc;
+import websitegateway.ChatbotGatewayGrpc;
 import websitegateway.Wechatwebsite;
 
 import java.util.concurrent.TimeUnit;
@@ -37,7 +37,7 @@ public class HelloBot extends WeChatBot {
 
     /*GRPC with gateway start*/
     private static ManagedChannel channel;
-    private static ChatBotGatewayGrpc.ChatBotGatewayBlockingStub blockingStub;
+    private static ChatbotGatewayGrpc.ChatbotGatewayBlockingStub blockingStub;
     private static String GATEWAY_HOST = "127.0.0.1";
     private static int GATEWAY_PORT = 40002;
 
@@ -46,7 +46,7 @@ public class HelloBot extends WeChatBot {
                 .usePlaintext(true)
                 .build();
 
-        blockingStub = ChatBotGatewayGrpc.newBlockingStub(channel);
+        blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
     }
 
     public void shutdown() throws InterruptedException {

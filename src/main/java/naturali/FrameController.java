@@ -18,35 +18,35 @@ public class FrameController {
             frameController = new FrameController();
         }
         return frameController;
-    }  
+    }
 
     public void init(NaturaliBot naturaliBot, Config config) {
         this.naturaliBot = naturaliBot;
         this.config = config;
         frame = new JFrame("ChatBot");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
     }
 
     public void showQRCode(String path, String text) {
-        frame = new JFrame("ChatBot_" + text);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JLabel label = new JLabel();
+        frame.getContentPane().removeAll();
         ImageIcon img = new ImageIcon(config.assetsDir() + "/" + path);// 创建图片对象
-        label.setIcon(img);
-        frame.add(label);
+        JLabel label = new JLabel(text, img, JLabel.CENTER);
+        label.setVerticalTextPosition(JLabel.TOP);
+        label.setHorizontalTextPosition(JLabel.CENTER);
+        frame.add(label, BorderLayout.CENTER);
         show();
     }
 
     public void showTips(String text) {
-        frame = new JFrame("ChatBot_" + text);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().removeAll();
         JLabel labelText = new JLabel(text, JLabel.CENTER);
-        frame.add(labelText);
+        frame.add(labelText, BorderLayout.CENTER);
         show();
     }
 
     private void show() {
-        frame.setSize(500, 500);
+        frame.setSize(600, 600);
         frame.setBackground(Color.WHITE);
         frame.setLocation(300, 300);
         frame.setVisible(true);
