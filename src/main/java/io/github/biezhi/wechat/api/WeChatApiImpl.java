@@ -98,7 +98,8 @@ public class WeChatApiImpl implements WeChatApi {
     /**
      * 自动登录
      */
-    private void autoLogin() {
+    @Override
+    public void autoLogin() {
         String file = bot.config().assetsDir() + "/login.json";
         try {
             HotReload hotReload = WeChatUtils.fromJson(new FileReader(file), HotReload.class);
