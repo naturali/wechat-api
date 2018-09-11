@@ -4,6 +4,8 @@ import io.github.biezhi.wechat.api.constant.Config;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class FrameController {
 
@@ -26,6 +28,12 @@ public class FrameController {
         frame = new JFrame("ChatBot");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                naturaliBot.api().logout();
+                System.exit(0);
+            }
+        });
     }
 
     public void showQRCode(String path, String text) {
