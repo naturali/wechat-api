@@ -22,6 +22,11 @@ public interface WeChatApi {
     void login(boolean autoLogin);
 
     /**
+     * 自动登录
+     */
+    public void autoLogin();
+
+    /**
      * 退出登录
      */
     void logout();
