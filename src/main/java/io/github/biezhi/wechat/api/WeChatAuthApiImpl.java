@@ -38,9 +38,8 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
 
     //    private String appID="wxb82cc0701446acde";
 //    private String redirectUri="https%3A%2F%2Fdeveloper.naturali.io%2Fwechat-auth";
-    private String appID = "wx28fca7046cf95cad";
-    private String appSecret = "897d31c95985ec2e08c0f767244d1937";
-    private String redirectUri = "https%3A%2F%2Fni-skill-lab-dev.naturali.io";
+    private String appID = "wxdfc9d5218a2b18fd";
+    private String redirectUri = "https%3A%2F%2Fconsole.naturali.io%2Fwechat-auth";
 
     public WeChatAuthApiImpl(WeChatBot bot) {
         this.bot = bot;
@@ -131,7 +130,7 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                 .add("appid", appID)
                 .add("scope", "snsapi_login")
                 .add("redirect_uri", redirectUri)
-                .add("state", "gcfvks2tot")
+                .add("state", "1nbu2i1ydwh")
                 .add("login_type", "jssdk")
                 .add("self_redirect", "false")
                 .add("style", "white")
@@ -196,18 +195,6 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
             return code;
         }
         return AuthStateCode.FAIL;
-    }
-
-    private String pushAuthLogin(String authCode) {
-        String baseUrl = "https://api.weixin.qq.com/sns/oauth2/access_token";
-        Long time = System.currentTimeMillis();
-        JsonResponse apiResponse = this.client.send(new JsonRequest(baseUrl)
-                .add("appid", appID)
-                .add("secret", appSecret)
-                .add("code", authCode)
-                .add("grant_type", "authorization_code"));
-        System.out.println("^^^^^^^^^^^" + apiResponse.getRawBody());
-        return apiResponse.getString("unionid");
     }
 
     @Override
