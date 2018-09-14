@@ -48,7 +48,8 @@ public class ChatLoop implements Runnable {
                 } else if (syncCheckRet.getRetCode() == LOGIN_OTHERWISE) {
                     FrameController.instance().showTips("你在其他地方登录了 WEB 版微信，再见");
                     log.info("你在其他地方登录了 WEB 版微信，再见");
-                    api.autoLogin();
+//                    api.autoLogin();
+                    api.login(false);
                     break;
                 } else if (syncCheckRet.getRetCode() == NORMAL) {
                     // 更新最后一次正常检查时间

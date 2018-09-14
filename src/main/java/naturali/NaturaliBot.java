@@ -82,10 +82,10 @@ public class NaturaliBot extends WeChatBot {
     /*GRPC with gateway start*/
     private static ManagedChannel channel;
     private static ChatbotGatewayGrpc.ChatbotGatewayBlockingStub blockingStub;
-    private static String GATEWAY_HOST = "47.94.181.104";
-    private static int GATEWAY_PORT = 31934;
-//    private static String GATEWAY_HOST = "127.0.0.1";
-//    private static int GATEWAY_PORT = 40002;
+    //    private static String GATEWAY_HOST = "47.94.181.104";
+//    private static int GATEWAY_PORT = 31934;
+    private static String GATEWAY_HOST = "127.0.0.1";
+    private static int GATEWAY_PORT = 40002;
 
     public static void initGrpc(String host, int port) {
         channel = ManagedChannelBuilder.forAddress(host, port)
@@ -129,8 +129,8 @@ public class NaturaliBot extends WeChatBot {
             Wechatwebsite.Message response = blockingStub.requestMessage(baseInfo);
             shutdown();
             if (response.getText() != null && response.getText() != "") {
-                FrameController.instance().showTips("发送给 [" + response.getChatNickName() + "] 的消息: {" + response.getText() + "}");
-                this.sendMsg(response.getChatUserName(), response.getText());
+                boolean success = this.sendMsg(response.getChatUserName(), response.getText());
+                FrameController.instance().showTips("发送给 [" + response.getChatNickName() + "] 的消息: {" + response.getText() + "},"+success);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,9 +145,9 @@ public class NaturaliBot extends WeChatBot {
                 .setAuthCode(this.authApi().getAuthCode()).build();
         initGrpc(GATEWAY_HOST, GATEWAY_PORT);
         try {
-            Wechatwebsite.Reply reply = blockingStub.getOrgId(baseInfo);
+            Wechatwebsite.BaseInfo reply = blockingStub.getOrgId(baseInfo);
             shutdown();
-            return reply.getMsg();
+            return reply.getOrgId();
         } catch (Exception e) {
             e.printStackTrace();
         }
