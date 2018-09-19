@@ -44,14 +44,14 @@ import static io.github.biezhi.wechat.api.constant.Constant.*;
 @Slf4j
 public class WeChatApiImpl implements WeChatApi {
 
-    private static final Pattern UUID_PATTERN          = Pattern.compile("window.QRLogin.code = (\\d+); window.QRLogin.uuid = \"(\\S+?)\";");
-    private static final Pattern CHECK_LOGIN_PATTERN   = Pattern.compile("window.code=(\\d+)");
+    private static final Pattern UUID_PATTERN = Pattern.compile("window.QRLogin.code = (\\d+); window.QRLogin.uuid = \"(\\S+?)\";");
+    private static final Pattern CHECK_LOGIN_PATTERN = Pattern.compile("window.code=(\\d+)");
     private static final Pattern PROCESS_LOGIN_PATTERN = Pattern.compile("window.redirect_uri=\"(\\S+)\";");
-    private static final Pattern SYNC_CHECK_PATTERN    = Pattern.compile("window.synccheck=\\{retcode:\"(\\d+)\",selector:\"(\\d+)\"}");
+    private static final Pattern SYNC_CHECK_PATTERN = Pattern.compile("window.synccheck=\\{retcode:\"(\\d+)\",selector:\"(\\d+)\"}");
 
-    private String    uuid;
-    private boolean   logging;
-    private int       memberCount;
+    private String uuid;
+    private boolean logging;
+    private int memberCount;
     private WeChatBot bot;
     private BotClient client;
 
@@ -60,6 +60,8 @@ public class WeChatApiImpl implements WeChatApi {
      */
     @Getter
     private Map<String, Account> accountMap = new HashMap<>();
+    @Getter
+    private Map<String, Account> accountNickMap = new HashMap<>();
 
     /**
      * 特殊账号
@@ -127,8 +129,6 @@ public class WeChatApiImpl implements WeChatApi {
                     }
                     log.info("开始下载二维码");
                     this.getQrImage(this.uuid, bot.config().showTerminal());
-                    DateUtils.sleep(500);
-                    FrameController.instance().showQRCode("qrcode.png","website login");
                     log.info("请使用手机扫描屏幕二维码");
                 }
                 Boolean isLoggedIn = false;
@@ -154,7 +154,10 @@ public class WeChatApiImpl implements WeChatApi {
                 }
             }
         }
+        onLogin();
+    }
 
+    private void onLogin() {
         this.webInit();
         this.statusNotify();
         this.loadContact(0);
@@ -172,6 +175,46 @@ public class WeChatApiImpl implements WeChatApi {
         log.info("[{}] 登录成功.", bot.session().getNickName());
         this.startRevive();
         this.logging = false;
+    }
+
+    @Override
+    public void loginForce() {
+        this.logging = true;
+        while (logging) {
+            this.uuid = null;
+            if (null == this.uuid) {
+                while (null == this.getUUID()) {
+                    DateUtils.sleep(10);
+                }
+                log.info("开始下载二维码");
+                this.getQrImage(this.uuid, bot.config().showTerminal());
+                log.info("请使用手机扫描屏幕二维码");
+            }
+            Boolean isLoggedIn = false;
+            while (null == isLoggedIn || !isLoggedIn) {
+                String status = this.checkLogin(this.uuid);
+                if (StateCode.SUCCESS.equals(status)) {
+                    isLoggedIn = true;
+                } else if ("201".equals(status)) {
+                    if (null != isLoggedIn) {
+                        log.info("请在手机上确认登录");
+                        isLoggedIn = null;
+                    }
+                } else if ("408".equals(status)) {
+                    break;
+                }
+                DateUtils.sleep(300);
+            }
+            if (null != isLoggedIn && isLoggedIn) {
+                break;
+            }
+            if (logging) {
+                log.info("登录超时，重新加载二维码");
+            }
+        }
+
+        onLogin();
+        FrameController.instance().showTips("RUNNING");
     }
 
     /**
@@ -199,17 +242,19 @@ public class WeChatApiImpl implements WeChatApi {
      * @param terminalShow 是否在终端显示输出
      */
     private void getQrImage(String uuid, boolean terminalShow) {
-        String uid    = null != uuid ? uuid : this.uuid;
+        FrameController.instance().showTips("开始下载二维码");
+        String uid = null != uuid ? uuid : this.uuid;
         String imgDir = bot.config().assetsDir();
 
         FileResponse fileResponse = this.client.download(
                 new FileRequest(String.format("%s/qrcode/%s", Constant.BASE_URL, uid)));
 
         InputStream inputStream = fileResponse.getInputStream();
-        File        qrCode      = WeChatUtils.saveFile(inputStream, imgDir, "qrcode.png");
+        File qrCode = WeChatUtils.saveFile(inputStream, imgDir, "qrcode.png");
         DateUtils.sleep(200);
         try {
             QRCodeUtils.showQrCode(qrCode, terminalShow);
+            FrameController.instance().showQRCode("qrcode.png", "website login");
         } catch (Exception e) {
             this.getQrImage(uid, terminalShow);
         }
@@ -222,9 +267,9 @@ public class WeChatApiImpl implements WeChatApi {
      * @return 返回登录状态码
      */
     private String checkLogin(String uuid) {
-        String uid  = null != uuid ? uuid : this.uuid;
-        String url  = String.format("%s/cgi-bin/mmwebwx-bin/login", Constant.BASE_URL);
-        Long   time = System.currentTimeMillis();
+        String uid = null != uuid ? uuid : this.uuid;
+        String url = String.format("%s/cgi-bin/mmwebwx-bin/login", Constant.BASE_URL);
+        Long time = System.currentTimeMillis();
 
         ApiResponse response = this.client.send(new StringRequest(url)
                 .add("loginicon", true).add("uuid", uid)
@@ -253,7 +298,7 @@ public class WeChatApiImpl implements WeChatApi {
      */
     private boolean processLoginSession(String loginContent) {
         LoginSession loginSession = bot.session();
-        Matcher      matcher      = PROCESS_LOGIN_PATTERN.matcher(loginContent);
+        Matcher matcher = PROCESS_LOGIN_PATTERN.matcher(loginContent);
         if (matcher.find()) {
             loginSession.setUrl(matcher.group(1));
         }
@@ -475,11 +520,15 @@ public class WeChatApiImpl implements WeChatApi {
             seq = jsonObject.get("Seq").getAsInt();
 
             this.memberCount += jsonObject.get("MemberCount").getAsInt();
-            List<Account> memberList = WeChatUtils.fromJson(WeChatUtils.toJson(jsonObject.getAsJsonArray("MemberList")), new TypeToken<List<Account>>() {});
+            List<Account> memberList = WeChatUtils.fromJson(WeChatUtils.toJson(jsonObject.getAsJsonArray("MemberList")), new TypeToken<List<Account>>() {
+            });
 
             for (Account account : memberList) {
-                if (null == account.getUserName()) {
+                if (null != account.getUserName()) {
                     accountMap.put(account.getUserName(), account);
+                }
+                if (null != account.getNickName()) {
+                    accountNickMap.put(account.getNickName(), account);
                 }
             }
             // 查看seq是否为0，0表示好友列表已全部获取完毕，若大于0，则表示好友列表未获取完毕，当前的字节数（断点续传）
@@ -524,7 +573,8 @@ public class WeChatApiImpl implements WeChatApi {
                 .add("List", list)
         );
 
-        this.groupList = WeChatUtils.fromJson(WeChatUtils.toJson(jsonResponse.toJsonObject().getAsJsonArray("ContactList")), new TypeToken<List<Account>>() {});
+        this.groupList = WeChatUtils.fromJson(WeChatUtils.toJson(jsonResponse.toJsonObject().getAsJsonArray("ContactList")), new TypeToken<List<Account>>() {
+        });
     }
 
     /**
@@ -577,7 +627,7 @@ public class WeChatApiImpl implements WeChatApi {
                 bot.session().getUrl(), System.currentTimeMillis() / 1000, bot.session().getPassTicket());
 
         List<Map<String, Object>> verifyUserList = new ArrayList<>();
-        Map<String, Object>       verifyUser     = new HashMap<>(2);
+        Map<String, Object> verifyUser = new HashMap<>(2);
         verifyUser.put("Value", recommend.getUserName());
         verifyUser.put("VerifyUserTicket", recommend.getTicket());
         verifyUserList.add(verifyUser);
@@ -601,7 +651,7 @@ public class WeChatApiImpl implements WeChatApi {
                 bot.session().getUrl(), System.currentTimeMillis() / 1000, bot.session().getPassTicket());
 
         List<Map<String, Object>> verifyUserList = new ArrayList<>();
-        Map<String, Object>       verifyUser     = new HashMap<>(2);
+        Map<String, Object> verifyUser = new HashMap<>(2);
         verifyUser.put("Value", friendUserName);
         verifyUser.put("VerifyUserTicket", "");
         verifyUserList.add(verifyUser);
@@ -621,7 +671,7 @@ public class WeChatApiImpl implements WeChatApi {
 
     @Override
     public boolean createChatRoom(String topic, List<String> members) {
-        String                    url        = String.format("%s/webwxcreatechatroom?r=%s&lang=zh_CN", bot.session().getUrl());
+        String url = String.format("%s/webwxcreatechatroom?r=%s&lang=zh_CN", bot.session().getUrl());
         List<Map<String, String>> memberList = new ArrayList<>(members.size());
         for (String member : members) {
             Map<String, String> m = new HashMap<>(2);
@@ -694,7 +744,7 @@ public class WeChatApiImpl implements WeChatApi {
                 bot.session().getUrl(), System.currentTimeMillis() / 1000, bot.session().getPassTicket());
 
         List<Map<String, String>> list = new ArrayList<>();
-        Map<String, String>       map  = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         map.put("UserName", id);
         map.put("EncryChatRoomId", id);
         list.add(map);
@@ -704,7 +754,8 @@ public class WeChatApiImpl implements WeChatApi {
                 .add("Count", bot.session().getBaseRequest())
                 .add("List", list));
 
-        return WeChatUtils.fromJson(WeChatUtils.toJson(response.toJsonObject().getAsJsonObject("")), new TypeToken<List<Account>>() {});
+        return WeChatUtils.fromJson(WeChatUtils.toJson(response.toJsonObject().getAsJsonObject("")), new TypeToken<List<Account>>() {
+        });
     }
 
     /**
@@ -747,7 +798,7 @@ public class WeChatApiImpl implements WeChatApi {
     public List<WeChatMessage> handleMsg(List<Message> messages) {
         if (null != messages && messages.size() > 0) {
             List<WeChatMessage> weChatMessages = new ArrayList<>(messages.size());
-            boolean             hashNewMsg     = false;
+            boolean hashNewMsg = false;
             for (Message message : messages) {
                 WeChatMessage weChatMessage = this.processMsg(message);
                 if (null != weChatMessage) {
@@ -763,11 +814,20 @@ public class WeChatApiImpl implements WeChatApi {
         return null;
     }
 
+    @Override
+    public String getUserIdByNick(String userId) {
+        Account account = accountNickMap.get(userId);
+        if (null == account) {
+            return "";
+        }
+        return account.getUserName();
+    }
+
     private WeChatMessage processMsg(Message message) {
-        Integer type    = message.getType();
-        String  name    = this.getUserRemarkName(message.getFromUserName());
-        String  msgId   = message.getId();
-        String  content = message.getContent();
+        Integer type = message.getType();
+        String name = this.getUserRemarkName(message.getFromUserName());
+        String msgId = message.getId();
+        String content = message.getContent();
 
         // 不处理自己发的消息
         if (message.getFromUserName().equals(bot.session().getUserName())) {
@@ -953,10 +1013,10 @@ public class WeChatApiImpl implements WeChatApi {
     private String downloadFile(DownLoad downLoad) {
         String url = String.format(downLoad.getApiURL().getUrl(), downLoad.getParams());
 
-        FileResponse response    = this.client.download(new FileRequest(url));
-        InputStream  inputStream = response.getInputStream();
+        FileResponse response = this.client.download(new FileRequest(url));
+        InputStream inputStream = response.getInputStream();
 
-        String id  = downLoad.getFileName();
+        String id = downLoad.getFileName();
         String dir = downLoad.getDir(bot);
         return WeChatUtils.saveFileByDay(inputStream, dir, id, downLoad.isSaveByDay()).getPath();
     }
@@ -975,8 +1035,8 @@ public class WeChatApiImpl implements WeChatApi {
             throw new WeChatException("文件[" + filePath + "]不存在");
         }
         log.info("开始上传文件: {}", filePath);
-        long   size      = file.length();
-        String mimeType  = WeChatUtils.getMimeType(filePath);
+        long size = file.length();
+        String mimeType = WeChatUtils.getMimeType(filePath);
         String mediatype = "doc";
         if (mediatype.contains("image")) {
             mediatype = "pic";
@@ -987,7 +1047,7 @@ public class WeChatApiImpl implements WeChatApi {
         if (mediatype.contains("video")) {
             mediatype = "video";
         }
-        String url     = String.format("%s/webwxuploadmedia?f=json", bot.session().getFileUrl());
+        String url = String.format("%s/webwxuploadmedia?f=json", bot.session().getFileUrl());
         String mediaId = System.currentTimeMillis() / 1000 + StringUtils.random(6);
 
         Map<String, Object> uploadMediaRequest = new HashMap<>(10);
@@ -1072,7 +1132,7 @@ public class WeChatApiImpl implements WeChatApi {
     @Override
     public boolean sendText(String toUserName, String msg) {
         DateUtils.sendSleep();
-        String url   = String.format("%s/webwxsendmsg?pass_ticket=%s", bot.session().getUrl(), bot.session().getPassTicket());
+        String url = String.format("%s/webwxsendmsg?pass_ticket=%s", bot.session().getUrl(), bot.session().getPassTicket());
         String msgId = System.currentTimeMillis() / 1000 + StringUtils.random(6);
 
         JsonResponse response = this.client.send(new JsonRequest(url).post().jsonBody()
@@ -1085,7 +1145,7 @@ public class WeChatApiImpl implements WeChatApi {
     @Override
     public boolean sendFile(String toUser, String filePath) {
         DateUtils.sendSleep();
-        String        title         = new File(filePath).getName();
+        String title = new File(filePath).getName();
         MediaResponse mediaResponse = this.uploadMedia(toUser, filePath);
         if (null == mediaResponse) {
             log.warn("上传附件到微信出错");

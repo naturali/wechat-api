@@ -188,6 +188,17 @@ public class WeChatBot {
         return this.api.sendText(name, msg);
     }
 
+
+    /**
+     * 给某个用户发送消息
+     *
+     * @param nick 用户UserNick
+     * @return 发送是否成功
+     */
+    public String getUserIdByNick(String nick) {
+        return this.api.getUserIdByNick(nick);
+    }
+
     /**
      * 根据名称发送消息
      *
@@ -334,7 +345,7 @@ public class WeChatBot {
                 log.debug("写入本地登录JSON");
             }
             String fileAuth = this.config().assetsDir() + "/loginAuth.json";
-            WeChatUtils.writeJson(fileAuth, HotReloadAuth.build(this.session().getNickName(),this.authApi.getOrgId()));
+            WeChatUtils.writeJson(fileAuth, HotReloadAuth.build(this.session().getNickName(), this.authApi.getOrgId()));
             if (log.isDebugEnabled()) {
                 log.debug("写入本地登录Auth-JSON");
             }
@@ -344,7 +355,7 @@ public class WeChatBot {
     public static final class Builder {
 
         private Config config = Config.me();
-        private BotClient    botClient;
+        private BotClient botClient;
         private OkHttpClient okHttpClient;
 
         public Builder() {

@@ -22,6 +22,13 @@ public interface WeChatApi {
     void login(boolean autoLogin);
 
     /**
+     * 强制扫码登录重新登陆
+     *
+     * @return
+     */
+    void loginForce();
+
+    /**
      * 自动登录
      */
     public void autoLogin();
@@ -59,6 +66,13 @@ public interface WeChatApi {
      * @return
      */
     List<WeChatMessage> handleMsg(List<Message> messages);
+
+    /**
+     * 发送文本消息
+     *
+     * @param userId
+     */
+    String getUserIdByNick(String userId);
 
     /**
      * 发送文本消息

@@ -2,10 +2,15 @@ package naturali;
 
 import io.github.biezhi.wechat.api.constant.Config;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 
 public class FrameController {
 
@@ -38,10 +43,17 @@ public class FrameController {
 
     public void showQRCode(String path, String text) {
         frame.getContentPane().removeAll();
-        ImageIcon img = new ImageIcon(config.assetsDir() + "/" + path);// 创建图片对象
+        ImageIcon img = null;// 创建图片对象
+        try {
+            img = new ImageIcon(ImageIO.read(new File(config.assetsDir() + "/" + path)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        ImageIcon img = new ImageIcon(config.assetsDir() + "/" + path);// 创建图片对象,这种方法，二维码改变的时候图片不刷新
         JLabel label = new JLabel(text, img, JLabel.CENTER);
         label.setVerticalTextPosition(JLabel.TOP);
         label.setHorizontalTextPosition(JLabel.CENTER);
+        label.repaint();
         frame.add(label, BorderLayout.CENTER);
         show();
     }

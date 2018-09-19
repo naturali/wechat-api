@@ -31,8 +31,9 @@ public class ChatLoop implements Runnable {
     public void run() {
         while (bot.isRunning() ) {
             if (bot.authApi().getOrgId()==null||bot.authApi().getOrgId()==""){
+                log.info("orgid为null");
                 DateUtils.sleep(1000);
-                continue;
+//                continue;
             }
             try {
                 SyncCheckRet syncCheckRet = api.syncCheck();
@@ -43,13 +44,14 @@ public class ChatLoop implements Runnable {
                 } else if (syncCheckRet.getRetCode() == MOBILE_LOGIN_OUT) {
                     FrameController.instance().showTips("你在手机上登出了微信，再见");
                     log.info("你在手机上登出了微信，再见");
-                    api.autoLogin();
+                    DateUtils.sleep(500);
+                    api.loginForce();
                     break;
                 } else if (syncCheckRet.getRetCode() == LOGIN_OTHERWISE) {
                     FrameController.instance().showTips("你在其他地方登录了 WEB 版微信，再见");
                     log.info("你在其他地方登录了 WEB 版微信，再见");
-//                    api.autoLogin();
-                    api.login(false);
+                    DateUtils.sleep(500);
+                    api.loginForce();
                     break;
                 } else if (syncCheckRet.getRetCode() == NORMAL) {
                     // 更新最后一次正常检查时间

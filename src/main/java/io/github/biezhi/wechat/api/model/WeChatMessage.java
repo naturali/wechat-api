@@ -109,6 +109,15 @@ public class WeChatMessage {
     }
 
     /**
+     * 获取发送人姓名如果有备注则优先显示备注，否则显示昵称
+     *
+     * @return
+     */
+    public String getNickName() {
+        return  this.fromNickName;
+    }
+
+    /**
      * 是否是群聊消息
      *
      * @return 返回是否是群组消息

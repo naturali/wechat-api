@@ -78,8 +78,6 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                 }
                 log.info("开始下载Auth二维码");
                 this.getAuthQrImage(this.authUuid, bot.config().showTerminal());
-                DateUtils.sleep(500);
-                FrameController.instance().showQRCode("qrcodeAuth.png", "OAuth login");
                 log.info("请使用手机扫描屏幕二维码");
                 Boolean isLoggedIn = false;
                 Boolean isLast404 = false;
@@ -163,6 +161,7 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
         File qrCode = WeChatUtils.saveFile(inputStream, imgDir, "qrcodeAuth.png");
         DateUtils.sleep(200);
         try {
+            FrameController.instance().showQRCode("qrcodeAuth.png", "OAuth login");
             QRCodeUtils.showQrCode(qrCode, terminalShow);
         } catch (Exception e) {
             this.getAuthQrImage(uid, terminalShow);
