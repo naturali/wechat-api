@@ -61,9 +61,11 @@ public class NaturaliBot extends WeChatBot {
                     continue;
                 }
                 this.authApi().setOrgId(getOrgId());//获取orgid兼检测后台运行状况
+                FrameController.instance().resetOrg( this.authApi().getOrgId());
                 if (isStrEpmty(this.authApi().getOrgId())) {
                     System.out.printf("未获取到所属organization");
-                    FrameController.instance().showTips("未获取到所属organization\n\n请检查后台是否连通,或检测您是否已注册为公司成员");
+                    FrameController.instance().showTips("未获取到所属organization\n\n请检查后台是否连通,或检测您是否已注册为公司成员，5s后会重新尝试");
+                    DateUtils.sleep(5000);
                     continue;
                 }
             }

@@ -17,6 +17,8 @@ public class FrameController {
     NaturaliBot naturaliBot;
     Config config;
     JFrame frame;
+    JLabel label;
+    JButton button;
 
     private static FrameController frameController;
 
@@ -39,10 +41,29 @@ public class FrameController {
                 System.exit(0);
             }
         });
+        frame.setLayout(null);
+
+        label = new JLabel("", null, JLabel.CENTER);
+        label.setVerticalTextPosition(JLabel.TOP);
+        label.setHorizontalTextPosition(JLabel.CENTER);
+        label.setBounds(0, 0, 600, 600);
+        frame.add(label, BorderLayout.CENTER);
+
+        button = new JButton("ResetOrg:");
+        button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String file = naturaliBot.config().assetsDir() + "/loginAuth.json";
+                new File(file).delete();
+                System.exit(0);
+            }
+        });
+        button.setBounds(350, 0, 250, 30);
+        frame.add(button);
+
+        show();
     }
 
     public void showQRCode(String path, String text) {
-        frame.getContentPane().removeAll();
         ImageIcon img = null;// 创建图片对象
         try {
             img = new ImageIcon(ImageIO.read(new File(config.assetsDir() + "/" + path)));
@@ -50,26 +71,25 @@ public class FrameController {
             e.printStackTrace();
         }
 //        ImageIcon img = new ImageIcon(config.assetsDir() + "/" + path);// 创建图片对象,这种方法，二维码改变的时候图片不刷新
-        JLabel label = new JLabel(text, img, JLabel.CENTER);
-        label.setVerticalTextPosition(JLabel.TOP);
-        label.setHorizontalTextPosition(JLabel.CENTER);
+        label.setText(text);
+        label.setIcon(img);
         label.repaint();
-        frame.add(label, BorderLayout.CENTER);
-        show();
     }
 
     public void showTips(String text) {
-        frame.getContentPane().removeAll();
-        JLabel labelText = new JLabel(text, JLabel.CENTER);
-        frame.add(labelText, BorderLayout.CENTER);
-        show();
+        label.setText(text);
+        label.setIcon(null);
     }
 
     private void show() {
         frame.setSize(600, 600);
         frame.setBackground(Color.WHITE);
-        frame.setLocation(300, 300);
+        frame.setLocation(200, 200);
         frame.setVisible(true);
+    }
+
+    public void resetOrg(String orgID){
+        button.setText("ResetOrg:" + orgID);
     }
 
 }
