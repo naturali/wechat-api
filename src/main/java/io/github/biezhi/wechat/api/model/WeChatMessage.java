@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 微信消息，封装了原始消息
  *
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WeChatMessage {
+public class WeChatMessage{
 
     /**
      * 微信原始消息
@@ -106,6 +108,15 @@ public class WeChatMessage {
      */
     public String getName() {
         return StringUtils.isEmpty(fromRemarkName) ? this.fromNickName : this.fromRemarkName;
+    }
+
+    /**
+     * 获取发送人姓名如果有备注则优先显示备注，否则显示昵称
+     *
+     * @return
+     */
+    public String getNickName() {
+        return  this.fromNickName;
     }
 
     /**

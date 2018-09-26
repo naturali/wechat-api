@@ -16,6 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <slf4j.version>1.6.1</slf4j.version>
         <!--<grpc.version>1.11.0</grpc.version>-->
         <!--<protobuf.version>3.5.1</protobuf.version>-->
     </properties>
@@ -105,6 +106,46 @@
             <version>1.8.0</version>
         </dependency>
 
+
+        <!--混淆和打包-->
+        <!-- MigLayout -->
+
+        <dependency>
+            <groupId>com.miglayout</groupId>
+            <artifactId>miglayout-javafx</artifactId>
+            <version>4.2</version>
+        </dependency>
+
+        <!-- Apache Commons -->
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+
+        <!-- Logging  -->
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -117,6 +158,30 @@
         </extensions>
         <plugins>
             <!--打jar包-->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>naturali.NaturaliBot</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
@@ -140,6 +205,8 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--打jar包 - end-->
+
             <!--用于根据proto文件生成java类的插件-->
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
@@ -167,6 +234,140 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <!--  这个plugin得作用是将依赖的jar包都打入可执行的程序 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 混淆 -->
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <version>2.0.11</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>proguard</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <proguardVersion>5.2</proguardVersion>
+                    <!--<attach>true</attach>-->
+                    <attachArtifactClassifier>pg</attachArtifactClassifier>
+                    <!-- attach 的作用是在 install 与 deploy 时将生成的 pg 文件也安装与部署 -->
+                    <options> <!-- 详细配置方式参考 ProGuard 官方文档 -->
+                        <!--<option>-dontobfuscate</option>-->
+                        <option>-ignorewarnings</option> <!--忽略所有告警-->
+                        <option>-dontshrink</option>   <!--不做 shrink -->
+                        <option>-dontoptimize</option> <!--不做 optimize -->
+                        <option>-dontskipnonpubliclibraryclasses</option>
+                        <option>-dontskipnonpubliclibraryclassmembers</option>
+
+                        <option>-repackageclasses naturali.chatbot.pg</option>
+                        <!--平行包结构（重构包层次），所有混淆的类放在 pg 包下-->
+
+                        <option>-keep class **.package-info</option>
+                        <!--保持包注解类-->
+
+                        <option>-keepclassmembers enum io.github.biezhi.wechat.api.enums.** { *;}</option>
+                        <option>-keepclassmembers class io.github.biezhi.wechat.api.** { *;}</option>
+                        <option>-keepclassmembers class com.google.zxing.** { *;}</option>
+                        <option>-keepclassmembers class okhttp3.** { *;}</option>
+                        <option>-keepclassmembers class com.sun.media.sound.** { *;}</option>
+                        <option>-keepclassmembers class com.sun.org.apache.bcel.internal.util.** { *;}</option>
+                        <option>-keepclassmembers class ch.qos.logback.** { *;}</option>
+                        <option>-keepclassmembers class io.grpc.** { *;}</option>
+                        <option>-keepclassmembers class websitegateway.** { *;}</option>
+                        <option>-keepclassmembers class sun.reflect.** { *;}</option>
+                        <option>-keepclassmembers class io.opencensus.trace.** { *;}</option>
+
+                        <option>-keep class io.github.biezhi.wechat.api.** </option>
+                        <option>-keep class com.google.zxing.** </option>
+                        <option>-keep class okhttp3.** </option>
+                        <option>-keep class com.sun.media.sound.** </option>
+                        <option>-keep class com.sun.org.apache.bcel.internal.util.** </option>
+                        <option>-keep class ch.qos.logback.** </option>
+                        <option>-keep class io.grpc.** </option>
+                        <option>-keep class websitegateway.** </option>
+                        <option>-keep class sun.reflect.** </option>
+                        <option>-keep class io.opencensus.trace.** </option>
+                        <option>-keep class org.jsoup.**{*;}</option>
+                        <option>-keep class org.codehaus.** { *; }</option>
+
+                        <option>-keepnames class * implements java.io.Serializable</option>
+                        <option>-keep class * implements android.os.Parcelable { public static final android.os.Parcelable$Creator *; }</option>
+                        <option>-dontwarn org.jsoup.**</option>
+                        <option>-keeppackagenames org.jsoup.nodes</option>
+
+                        <!--保持源码名与行号（异常时有明确的栈信息），注解（默认会过滤掉所有注解，会影响框架的注解）-->
+                        <option>-keepattributes SourceFile,LineNumberTable,*Annotation*</option>
+                        <option>-keepattributes *Annotation*,EnclosingMethod,Signature</option>
+                        <option>-keepattributes InnerClasses</option>
+
+                        <!-- 保持对外的接口性质类对外的类名与方法名不变 -->
+                        <option>-keep class naturali.NaturaliBot { public static void main(java.lang.String[]);}
+                        </option>
+
+                    </options>
+                    <outjar>${project.build.finalName}-pg.jar</outjar>
+                    <libs>
+                        <lib>${java.home}/lib/rt.jar</lib>
+                        <lib>${java.home}/lib/ext/jfxrt.jar</lib>
+                        <lib>${java.home}/lib/jce.jar</lib>
+                    </libs>
+
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sf.proguard</groupId>
+                        <artifactId>proguard-base</artifactId>
+                        <version>5.2.1</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <!-- 混淆 end-->
+
+            <!--打包-->
+            <plugin>
+                <groupId>com.zenjava</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>8.8.3</version>
+                <configuration>
+                    <updateExistingJar>true</updateExistingJar>
+                    <!-- 指明javafx的入口类 -->
+                    <mainClass>naturali.NaturaliBot</mainClass>
+                    <!-- 我是在MAC系统进行打包所以这里是dmg文件 -->
+                    <bundler>mac.app</bundler>
+                    <!--<bundler>dmg</bundler>-->
+                    <!-- 指明打包后文件的存储位置 -->
+                    <!--<jfxAppOutputDir>${project.build.directory}/app</jfxAppOutputDir>-->
+                    <!--<nativeOutputDir>${project.build.directory}/native</nativeOutputDir>-->
+                    <!-- 图标的位置 -->
+                    <!--<deployDir>${basedir}/src/deploy/</deployDir>-->
+                    <appName>Chatbot</appName>
+                    <vendor>naturali.io</vendor>
                 </configuration>
             </plugin>
         </plugins>

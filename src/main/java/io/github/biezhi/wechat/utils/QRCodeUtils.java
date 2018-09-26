@@ -38,7 +38,7 @@ public class QRCodeUtils {
                     return;
                 }
             } catch (Exception e) {
-                log.warn("在 {} 下打开文件 {} 失败", os, qrCode.getPath(), e);
+                System.out.print("在 {"+os+"} 下打开文件 {"+qrCode.getPath()+"} 失败"+e);
             }
         }
         Map<EncodeHintType, Object> hintMapEncode = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);

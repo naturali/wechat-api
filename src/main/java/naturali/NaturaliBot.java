@@ -17,6 +17,7 @@ import io.grpc.ManagedChannelBuilder;
 import websitegateway.ChatbotGatewayGrpc;
 import websitegateway.Wechatwebsite;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 
@@ -29,13 +30,13 @@ public class NaturaliBot extends WeChatBot {
 
     @Bind(msgType = MsgType.TEXT)
     public void handleText(WeChatMessage message) {
-        System.out.printf("接收到 [{%s}] 的消息: {%s}", message.getName(), message.getText());
-        FrameController.instance().showTips("接收到 [" + message.getName() + "] 的消息: {" + message.getText() + "}");
-        if (StringUtils.isNotEmpty(message.getName())) {
-            this.sendMsg(message.getFromUserName(), "自动回复: " + message.getText());
-        } else {
-            this.sendMsg(message.getFromUserName(), "自动回复new add: " + message.getText());
-        }
+        System.out.printf("接收到 [{%s}] 的消息: {%s}", message.getNickName(), message.getText());
+        FrameController.instance().showTips("接收到 [" + message.getNickName() + "] 的消息: {" + message.getText() + "}");
+//        if (StringUtils.isNotEmpty(message.getName())) {
+//            this.sendMsg(message.getFromUserName(), "自动回复: " + message.getText());
+//        } else {
+//            this.sendMsg(message.getFromUserName(), "自动回复new add: " + message.getText());
+//        }
         report(message);
 
     }
@@ -44,33 +45,32 @@ public class NaturaliBot extends WeChatBot {
     @Override
     protected void other() {
 //        super.other();
-        boolean canWork = true;
-        if (isStrEpmty(this.session().getNickName()) || isStrEpmty(this.session().getNickName())) {
-            canWork = false;
-            System.out.printf("website登陆失败");
-            FrameController.instance().showTips("website登陆失败");
-            return;
-        }
-        if (isStrEpmty(this.authApi().getOrgId())) {
-            if (isStrEpmty(this.authApi().getAuthCode())) {
-                canWork = false;
-                System.out.printf("OAuth登陆失败");
-                FrameController.instance().showTips("OAuth登陆失败");
-                return;
+        while (true) {
+            DateUtils.sleep(800);
+            if (isStrEpmty(this.session().getNickName()) || isStrEpmty(this.session().getNickName())) {
+                System.out.printf("website登陆失败");
+                FrameController.instance().showTips("website登陆失败");
+                this.api().loginForce();
+                continue;
             }
-            this.authApi().setOrgId(getOrgId());//获取orgid兼检测后台运行状况
-//            if (isStrEpmty(this.authApi().getOrgId())) {
-//                canWork = false;
-//                System.out.printf("未获取到所属organization");
-//                FrameController.instance().showTips("未获取到所属organization\n\n请检查后台是否连通,或检测您是否已注册为公司成员");
-//                return;
-//            }
-        }
-        while (canWork) {
+            if (isStrEpmty(this.authApi().getOrgId())) {
+                if (isStrEpmty(this.authApi().getAuthCode())) {
+                    System.out.printf("OAuth登陆失败");
+                    FrameController.instance().showTips("OAuth登陆失败");
+                    this.authApi().login(false);
+                    continue;
+                }
+                this.authApi().setOrgId(getOrgId());//获取orgid兼检测后台运行状况
+                FrameController.instance().resetOrg( this.authApi().getOrgId());
+                if (isStrEpmty(this.authApi().getOrgId())) {
+                    System.out.printf("未获取到所属organization");
+                    FrameController.instance().showTips("未获取到所属organization\n\n请检查后台是否连通,或检测您是否已注册为公司成员，5s后会重新尝试");
+                    DateUtils.sleep(5000);
+                    continue;
+                }
+            }
             request();
-            DateUtils.sleep(1000);
         }
-        System.out.printf("信息不全，登陆失败");
 
     }
 
@@ -127,11 +127,11 @@ public class NaturaliBot extends WeChatBot {
         initGrpc(GATEWAY_HOST, GATEWAY_PORT);
         try {
             Wechatwebsite.Message response = blockingStub.requestMessage(baseInfo);
-            shutdown();
             if (response.getText() != null && response.getText() != "") {
-                FrameController.instance().showTips("发送给 [" + response.getChatNickName() + "] 的消息: {" + response.getText() + "}");
-                this.sendMsg(response.getChatUserName(), response.getText());
+                boolean success = this.sendMsg(this.getUserIdByNick(response.getChatNickName()), response.getText());
+                FrameController.instance().showTips("发送给 [" + response.getChatNickName() + "] 的消息: {" + response.getText() + "}," + success);
             }
+            shutdown();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -145,9 +145,10 @@ public class NaturaliBot extends WeChatBot {
                 .setAuthCode(this.authApi().getAuthCode()).build();
         initGrpc(GATEWAY_HOST, GATEWAY_PORT);
         try {
-            Wechatwebsite.Reply reply = blockingStub.getOrgId(baseInfo);
+            Wechatwebsite.BaseInfo reply = blockingStub.getOrgId(baseInfo);
             shutdown();
-            return reply.getMsg();
+            return reply.getOrgId();
+//            return "naturali";
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -156,7 +157,7 @@ public class NaturaliBot extends WeChatBot {
 
     public static void main(String[] args) {
         Config config = Config.me();
-        NaturaliBot helloBot = new NaturaliBot(config.autoLogin(false).showTerminal(true));
+        NaturaliBot helloBot = new NaturaliBot(config.autoLogin(true).showTerminal(true));
         FrameController.instance().init(helloBot, config);
         FrameController.instance().showTips("initializing");
         helloBot.start();

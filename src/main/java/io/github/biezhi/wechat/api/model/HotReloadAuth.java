@@ -31,8 +31,7 @@ public class HotReloadAuth {
      * 重新登录
      */
     public boolean reLogin(WeChatBot bot) {
-        if (this.nikcName.equals(bot.session().getNickName())
-                && null != this.nikcName && !"".equals(this.nikcName)
+        if (null != this.nikcName && !"".equals(this.nikcName)
                 && null != this.orgId && !"".equals(this.orgId)) {
             bot.authApi().setOrgId((this.orgId));
             return true;

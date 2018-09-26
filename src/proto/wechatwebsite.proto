@@ -6,8 +6,7 @@ package websitegateway;
 service ChatbotGateway {
     rpc ReportMessage(Message) returns (Reply);
     rpc RequestMessage(BaseInfo) returns (Message);//for 轮询
-    rpc SendClientMessage (Message) returns (Reply);
-    rpc GetOrgId (BaseInfo) returns (Reply);
+    rpc GetOrgId (BaseInfo) returns (BaseInfo);
 }
 
 message Message {
@@ -49,7 +48,7 @@ message BaseInfo {
 }
 
 message Reply {
-    bool status = 1;
-    string msg = 2;
+    int32 error_code = 1;
+    string error_message = 2;
 }
 
