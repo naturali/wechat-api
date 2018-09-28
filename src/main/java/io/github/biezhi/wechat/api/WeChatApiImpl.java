@@ -162,7 +162,7 @@ public class WeChatApiImpl implements WeChatApi {
         this.statusNotify();
         this.loadContact(0);
 
-        System.out.print("应有 {} 个联系人，读取到联系人 {} 个" + "," + this.memberCount + "," + this.accountMap.size());
+        System.out.print("应有 {" + this.memberCount + "} 个联系人，读取到联系人 {" + this.accountMap.size() + "} 个");
         System.out.println();
 
         System.out.print("共有 {" + this.groupUserNames.size() + "} 个群 | {" + this.contactList.size() + "} 个直接联系人 | {" +

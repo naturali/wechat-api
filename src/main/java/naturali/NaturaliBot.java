@@ -50,8 +50,8 @@ public class NaturaliBot extends WeChatBot {
             if (isStrEpmty(this.session().getNickName()) || isStrEpmty(this.session().getNickName())) {
                 System.out.printf("website登陆失败");
                 FrameController.instance().showTips("website登陆失败");
-                this.api().loginForce();
-                continue;
+                DateUtils.sleep(5000);
+                return;
             }
             if (isStrEpmty(this.authApi().getOrgId())) {
                 if (isStrEpmty(this.authApi().getAuthCode())) {
@@ -71,7 +71,6 @@ public class NaturaliBot extends WeChatBot {
             }
             request();
         }
-
     }
 
 
@@ -148,7 +147,6 @@ public class NaturaliBot extends WeChatBot {
             Wechatwebsite.BaseInfo reply = blockingStub.getOrgId(baseInfo);
             shutdown();
             return reply.getOrgId();
-//            return "naturali";
         } catch (Exception e) {
             e.printStackTrace();
         }
