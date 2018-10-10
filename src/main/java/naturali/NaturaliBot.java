@@ -79,22 +79,12 @@ public class NaturaliBot extends WeChatBot {
     }
 
     /*GRPC with gateway start*/
-    private static ManagedChannel channel;
-    private static ChatbotGatewayGrpc.ChatbotGatewayBlockingStub blockingStub;
     private static String GATEWAY_HOST = "47.94.181.104";
     private static int GATEWAY_PORT = 31934;
 //    private static String GATEWAY_HOST = "127.0.0.1";
 //    private static int GATEWAY_PORT = 40002;
 
-    public static void initGrpc(String host, int port) {
-        channel = ManagedChannelBuilder.forAddress(host, port)
-                .usePlaintext(true)
-                .build();
-
-        blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
-    }
-
-    public void shutdown() throws InterruptedException {
+    public void shutdown(ManagedChannel channel) throws InterruptedException {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
 
@@ -108,10 +98,13 @@ public class NaturaliBot extends WeChatBot {
                 .setMsgType(Wechatwebsite.Message.MsgType.TEXT)
                 .setOrgId(this.authApi().getOrgId())
                 .setText(message.getText()).build();
-        initGrpc(GATEWAY_HOST, GATEWAY_PORT);
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(GATEWAY_HOST, GATEWAY_PORT)
+                .usePlaintext(true)
+                .build();
+        ChatbotGatewayGrpc.ChatbotGatewayBlockingStub  blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
         try {
             Wechatwebsite.Reply response = blockingStub.reportMessage(request);
-            shutdown();
+            shutdown(channel);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,14 +116,17 @@ public class NaturaliBot extends WeChatBot {
                 .setMineUserName(this.session().getUserName())
                 .setOrgId(this.authApi().getOrgId())
                 .setAuthCode(this.authApi().getAuthCode()).build();
-        initGrpc(GATEWAY_HOST, GATEWAY_PORT);
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(GATEWAY_HOST, GATEWAY_PORT)
+                .usePlaintext(true)
+                .build();
+        ChatbotGatewayGrpc.ChatbotGatewayBlockingStub  blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
         try {
             Wechatwebsite.Message response = blockingStub.requestMessage(baseInfo);
             if (response.getText() != null && response.getText() != "") {
                 boolean success = this.sendMsg(this.getUserIdByNick(response.getChatNickName()), response.getText());
                 FrameController.instance().showTips("发送给 [" + response.getChatNickName() + "] 的消息: {" + response.getText() + "}," + success);
             }
-            shutdown();
+            shutdown(channel);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -142,10 +138,13 @@ public class NaturaliBot extends WeChatBot {
                 .setMineUserName(this.session().getUserName())
                 .setOrgId("")
                 .setAuthCode(this.authApi().getAuthCode()).build();
-        initGrpc(GATEWAY_HOST, GATEWAY_PORT);
+        ManagedChannel channel = ManagedChannelBuilder.forAddress(GATEWAY_HOST, GATEWAY_PORT)
+                .usePlaintext(true)
+                .build();
+        ChatbotGatewayGrpc.ChatbotGatewayBlockingStub  blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
         try {
             Wechatwebsite.BaseInfo reply = blockingStub.getOrgId(baseInfo);
-            shutdown();
+            shutdown(channel);
             return reply.getOrgId();
         } catch (Exception e) {
             e.printStackTrace();
