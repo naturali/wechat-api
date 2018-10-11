@@ -18,12 +18,14 @@ import java.util.Map;
 public class HotReloadAuth {
 
     private String nikcName;
+    private String unionId;
     private String orgId;
 
-    public static HotReloadAuth build(String nikcName, String orgId) {
+    public static HotReloadAuth build(String nikcName, String orgId, String unionId) {
         HotReloadAuth hotReloadAuth = new HotReloadAuth();
         hotReloadAuth.nikcName = nikcName;
         hotReloadAuth.orgId = orgId;
+        hotReloadAuth.unionId = unionId;
         return hotReloadAuth;
     }
 
@@ -31,10 +33,12 @@ public class HotReloadAuth {
      * 重新登录
      */
     public boolean reLogin(WeChatBot bot) {
-        if (this.nikcName.equals(bot.session().getNickName())
-                && null != this.nikcName && !"".equals(this.nikcName)
-                && null != this.orgId && !"".equals(this.orgId)) {
+        if (null != this.nikcName && !"".equals(this.nikcName)
+                && null != this.orgId && !"".equals(this.orgId)
+                && null != this.unionId && !"".equals(this.unionId)) {
+            bot.authApi().setUnionName((this.nikcName));
             bot.authApi().setOrgId((this.orgId));
+            bot.authApi().setUnionId((this.unionId));
             return true;
         }
         return false;

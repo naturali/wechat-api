@@ -32,15 +32,14 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
     private String authUuid;
     private String authCode = "";
     private String orgId = "";
+    private String unionId = "";
+    private String unionName = "";
     private boolean authLogging;
     private WeChatBot bot;
     private BotClient client;
 
-    //    private String appID="wxb82cc0701446acde";
-//    private String redirectUri="https%3A%2F%2Fdeveloper.naturali.io%2Fwechat-auth";
-    private String appID = "wx28fca7046cf95cad";
-    private String appSecret = "897d31c95985ec2e08c0f767244d1937";
-    private String redirectUri = "https%3A%2F%2Fni-skill-lab-dev.naturali.io";
+    private String appID = "wxdfc9d5218a2b18fd";
+    private String redirectUri = "https%3A%2F%2Fconsole.naturali.io%2Fwechat-auth";
 
     public WeChatAuthApiImpl(WeChatBot bot) {
         this.bot = bot;
@@ -79,11 +78,10 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                 }
                 log.info("开始下载Auth二维码");
                 this.getAuthQrImage(this.authUuid, bot.config().showTerminal());
-                DateUtils.sleep(500);
-                FrameController.instance().showQRCode("qrcodeAuth.png","OAuth login");
                 log.info("请使用手机扫描屏幕二维码");
                 Boolean isLoggedIn = false;
                 Boolean isLast404 = false;
+                int count404 = 0;
                 while (null == isLoggedIn || !isLoggedIn) {
                     String status = this.checkLogin(this.authUuid, isLast404);
                     if (AuthStateCode.SUCCESS.equals(status)) {
@@ -94,16 +92,17 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                             log.info("请在手机上确认登录");
                             isLoggedIn = null;
                         }
-                    } else if (AuthStateCode.FAIL.equals(status)) {
+                    } else if (AuthStateCode.FAIL.equals(status) && count404 < 2) {
                         isLast404 = true;
+                        count404++;
                         if (null != isLoggedIn) {
                             log.info("请在手机上确认登录");
                             isLoggedIn = null;
                         }
-                    } else if (AuthStateCode.TIMEOUT.equals(status)) {
+                    } else if (AuthStateCode.TIMEOUT.equals(status) || AuthStateCode.FAIL.equals(status)) {
                         break;
                     }
-                    DateUtils.sleep(1000);
+                    DateUtils.sleep(300);
                 }
                 if (null != isLoggedIn && isLoggedIn) {
                     break;
@@ -129,7 +128,7 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
                 .add("appid", appID)
                 .add("scope", "snsapi_login")
                 .add("redirect_uri", redirectUri)
-                .add("state", "gcfvks2tot")
+                .add("state", "1nbu2i1ydwh")
                 .add("login_type", "jssdk")
                 .add("self_redirect", "false")
                 .add("style", "white")
@@ -162,6 +161,7 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
         File qrCode = WeChatUtils.saveFile(inputStream, imgDir, "qrcodeAuth.png");
         DateUtils.sleep(200);
         try {
+            FrameController.instance().showQRCode("qrcodeAuth.png", "OAuth login");
             QRCodeUtils.showQrCode(qrCode, terminalShow);
         } catch (Exception e) {
             this.getAuthQrImage(uid, terminalShow);
@@ -196,18 +196,6 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
         return AuthStateCode.FAIL;
     }
 
-    private String pushAuthLogin(String authCode) {
-        String baseUrl = "https://api.weixin.qq.com/sns/oauth2/access_token";
-        Long time = System.currentTimeMillis();
-        JsonResponse apiResponse = this.client.send(new JsonRequest(baseUrl)
-                .add("appid", appID)
-                .add("secret", appSecret)
-                .add("code", authCode)
-                .add("grant_type", "authorization_code"));
-        System.out.println("^^^^^^^^^^^" + apiResponse.getRawBody());
-        return apiResponse.getString("unionid");
-    }
-
     @Override
     public String getAuthCode() {
         return authCode;
@@ -221,6 +209,26 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
     @Override
     public void setOrgId(String orgId) {
         this.orgId = orgId;
+    }
+
+    @Override
+    public String getUnionId() {
+        return this.unionId;
+    }
+
+    @Override
+    public void setUnionId(String unionId) {
+        this.unionId = unionId;
+    }
+
+    @Override
+    public String getUnionName() {
+        return this.unionName;
+    }
+
+    @Override
+    public void setUnionName(String unionName) {
+        this.unionName = unionName;
     }
 
     @Override

@@ -37,6 +37,26 @@ public interface WeChatAuthApi {
     void setOrgId(String orgId);
 
     /**
+     * 获取UnionId
+     * */
+    String getUnionId();
+
+    /**
+     * set UnionId
+     * */
+    void setUnionId(String unionId);
+
+    /**
+     * 获取PairNickName
+     * */
+    String getUnionName();
+
+    /**
+     * set UnionName
+     * */
+    void setUnionName(String unionName);
+
+    /**
      * 退出登录
      */
     void logout();

@@ -8,12 +8,12 @@
       <sourceFolder url="file://$MODULE_DIR$/target/generated-sources/protobuf/java" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/target/generated-sources/protobuf/grpc-java" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.6.1" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: com.google.zxing:core:3.3.1" level="project" />
@@ -56,5 +56,11 @@
     <orderEntry type="library" name="Maven: io.grpc:grpc-protobuf-nano:1.8.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.protobuf.nano:protobuf-javanano:3.0.0-alpha-5" level="project" />
     <orderEntry type="library" name="Maven: io.grpc:grpc-stub:1.8.0" level="project" />
+    <orderEntry type="library" name="Maven: com.miglayout:miglayout-javafx:4.2" level="project" />
+    <orderEntry type="library" name="Maven: com.miglayout:miglayout-core:4.2" level="project" />
+    <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:jcl-over-slf4j:1.6.1" level="project" />
+    <orderEntry type="library" name="Maven: org.slf4j:slf4j-log4j12:1.6.1" level="project" />
+    <orderEntry type="library" name="Maven: log4j:log4j:1.2.16" level="project" />
   </component>
 </module>
