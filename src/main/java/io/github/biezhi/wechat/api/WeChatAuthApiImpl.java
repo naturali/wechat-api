@@ -32,12 +32,12 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
     private String authUuid;
     private String authCode = "";
     private String orgId = "";
+    private String unionId = "";
+    private String unionName = "";
     private boolean authLogging;
     private WeChatBot bot;
     private BotClient client;
 
-    //    private String appID="wxb82cc0701446acde";
-//    private String redirectUri="https%3A%2F%2Fdeveloper.naturali.io%2Fwechat-auth";
     private String appID = "wxdfc9d5218a2b18fd";
     private String redirectUri = "https%3A%2F%2Fconsole.naturali.io%2Fwechat-auth";
 
@@ -209,6 +209,26 @@ public class WeChatAuthApiImpl implements WeChatAuthApi {
     @Override
     public void setOrgId(String orgId) {
         this.orgId = orgId;
+    }
+
+    @Override
+    public String getUnionId() {
+        return this.unionId;
+    }
+
+    @Override
+    public void setUnionId(String unionId) {
+        this.unionId = unionId;
+    }
+
+    @Override
+    public String getUnionName() {
+        return this.unionName;
+    }
+
+    @Override
+    public void setUnionName(String unionName) {
+        this.unionName = unionName;
     }
 
     @Override

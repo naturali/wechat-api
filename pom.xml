@@ -162,26 +162,30 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>1.2.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>naturali.NaturaliBot</mainClass>
-                                </transformer>
-                            </transformers>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedClassifierName>shaded</shadedClassifierName>
+                    <transformers>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>naturali.NaturaliBot</mainClass>
+                        </transformer>
+                    </transformers>
+                </configuration>
             </plugin>
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4</version>
@@ -231,6 +235,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -302,21 +307,23 @@
                         <option>-keepclassmembers class sun.reflect.** { *;}</option>
                         <option>-keepclassmembers class io.opencensus.trace.** { *;}</option>
 
-                        <option>-keep class io.github.biezhi.wechat.api.** </option>
-                        <option>-keep class com.google.zxing.** </option>
-                        <option>-keep class okhttp3.** </option>
-                        <option>-keep class com.sun.media.sound.** </option>
-                        <option>-keep class com.sun.org.apache.bcel.internal.util.** </option>
-                        <option>-keep class ch.qos.logback.** </option>
-                        <option>-keep class io.grpc.** </option>
-                        <option>-keep class websitegateway.** </option>
-                        <option>-keep class sun.reflect.** </option>
-                        <option>-keep class io.opencensus.trace.** </option>
+                        <option>-keep class io.github.biezhi.wechat.api.**</option>
+                        <option>-keep class com.google.zxing.**</option>
+                        <option>-keep class okhttp3.**</option>
+                        <option>-keep class com.sun.media.sound.**</option>
+                        <option>-keep class com.sun.org.apache.bcel.internal.util.**</option>
+                        <option>-keep class ch.qos.logback.**</option>
+                        <option>-keep class io.grpc.**</option>
+                        <option>-keep class websitegateway.**</option>
+                        <option>-keep class sun.reflect.**</option>
+                        <option>-keep class io.opencensus.trace.**</option>
                         <option>-keep class org.jsoup.**{*;}</option>
                         <option>-keep class org.codehaus.** { *; }</option>
 
                         <option>-keepnames class * implements java.io.Serializable</option>
-                        <option>-keep class * implements android.os.Parcelable { public static final android.os.Parcelable$Creator *; }</option>
+                        <option>-keep class * implements android.os.Parcelable { public static final
+                            android.os.Parcelable$Creator *; }
+                        </option>
                         <option>-dontwarn org.jsoup.**</option>
                         <option>-keeppackagenames org.jsoup.nodes</option>
 
@@ -360,6 +367,7 @@
                     <mainClass>naturali.NaturaliBot</mainClass>
                     <!-- 我是在MAC系统进行打包所以这里是dmg文件 -->
                     <bundler>mac.app</bundler>
+                    <!--<bundler>windows.app</bundler>-->
                     <!--<bundler>dmg</bundler>-->
                     <!-- 指明打包后文件的存储位置 -->
                     <!--<jfxAppOutputDir>${project.build.directory}/app</jfxAppOutputDir>-->
@@ -370,6 +378,51 @@
                     <vendor>naturali.io</vendor>
                 </configuration>
             </plugin>
+
+
+            <!--<plugin>-->
+                <!--<groupId>com.akathist.maven.plugins.launch4j</groupId>-->
+                <!--<artifactId>launch4j-maven-plugin</artifactId>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>l4j-clui</id>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>launch4j</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<headerType>gui</headerType>-->
+                            <!--&lt;!&ndash;<jar>/Users/wangkuijuan/Documents/workspace/java/wechat-api/target/wechat-api-1.0.6-jar-with-dependencies.jar</jar>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<jar>${project.build.directory}/wechat-api-1.0.6-jar-with-dependencies.jar</jar>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<jar>${project.build.directory}/${artifactId}-${version}-jar-with-dependencies.jar</jar>&ndash;&gt;-->
+                            <!--<jar>${project.build.directory}/${artifactId}-${version}-shaded.jar</jar>-->
+                            <!--<outfile>${project.build.directory}/hasCode.exe</outfile>-->
+                            <!--<downloadUrl>http://java.com/download</downloadUrl>-->
+                            <!--<classPath>-->
+                                <!--<mainClass>naturali.NaturaliBot</mainClass>-->
+                                <!--<preCp>anything</preCp>-->
+                            <!--</classPath>-->
+                            <!--&lt;!&ndash;<icon>src/resources/0.ico</icon>&ndash;&gt;-->
+                            <!--<jre>-->
+                                <!--<minVersion>1.8.0</minVersion>-->
+                                <!--<jdkPreference>preferJre</jdkPreference>-->
+                            <!--</jre>-->
+                            <!--<versionInfo>-->
+                                <!--<fileVersion>1.0.0.0</fileVersion>-->
+                                <!--<txtFileVersion>${project.version}</txtFileVersion>-->
+                                <!--<fileDescription>${project.name}</fileDescription>-->
+                                <!--<copyright>2012 hasCode.com</copyright>-->
+                                <!--<productVersion>1.0.0.0</productVersion>-->
+                                <!--<txtProductVersion>1.0.0.0</txtProductVersion>-->
+                                <!--<productName>${project.name}</productName>-->
+                                <!--<companyName>hasCode.com</companyName>-->
+                                <!--<internalName>hasCode</internalName>-->
+                                <!--<originalFilename>hasCode.exe</originalFilename>-->
+                            <!--</versionInfo>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 
@@ -500,6 +553,17 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.5.1</version>
+                        <configuration>
+                            <source>1.8</source>
+                            <target>1.8</target>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

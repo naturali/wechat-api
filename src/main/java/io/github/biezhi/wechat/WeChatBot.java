@@ -277,7 +277,7 @@ public class WeChatBot {
         this.authApi = new WeChatAuthApiImpl(this);
         log.info("wechat-bot: {}", Constant.VERSION);
         authApi.login(config.autoLogin());
-        FrameController.instance().resetOrg( this.authApi().getOrgId());
+        FrameController.instance().resetOrg( this.authApi().getOrgId(),this.authApi().getUnionName());
         FrameController.instance().showTips("请稍等");
         api.login(config.autoLogin());
         FrameController.instance().showTips("RUNNING");
@@ -346,7 +346,7 @@ public class WeChatBot {
                 log.debug("写入本地登录JSON");
             }
             String fileAuth = this.config().assetsDir() + "/loginAuth.json";
-            WeChatUtils.writeJson(fileAuth, HotReloadAuth.build(this.session().getNickName(), this.authApi.getOrgId()));
+            WeChatUtils.writeJson(fileAuth, HotReloadAuth.build(this.authApi.getUnionName(), this.authApi.getOrgId(),this.authApi.getUnionId()));
             if (log.isDebugEnabled()) {
                 log.debug("写入本地登录Auth-JSON");
             }
