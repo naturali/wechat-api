@@ -12,12 +12,11 @@ service ChatbotGateway {
 message Message {
     ChatType chatType = 1;
     MsgType msgType = 2;
-    string mineUserName = 3;
-    string mineNickName = 4;
-    string text = 5;
-    string chatUserName = 6;
-    string chatNickName = 7;
-    string orgId = 8;
+    string mineNickName = 3;
+    string text = 4;
+    string chatNickName = 5;
+    string orgId = 6;
+    string unionId = 7;
 
     enum ChatType {
         RECEIVE = 0;
@@ -41,10 +40,10 @@ message Message {
 }
 
 message BaseInfo {
-    string mineUserName = 1;
-    string mineNickName = 2;
-    string orgId = 3;
-    string authCode = 4;
+    string mineNickName = 1;
+    string orgId = 2;
+    string authCode = 3;
+    string unionId = 4;
 }
 
 message Reply {

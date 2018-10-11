@@ -60,8 +60,13 @@ public class NaturaliBot extends WeChatBot {
                     this.authApi().login(false);
                     continue;
                 }
-                this.authApi().setOrgId(getOrgId());//获取orgid兼检测后台运行状况
-                FrameController.instance().resetOrg( this.authApi().getOrgId());
+                Wechatwebsite.BaseInfo baseInfo = getOrgId();
+                if (baseInfo != null && baseInfo.getOrgId() != null && baseInfo.getUnionId() != null) {
+                    this.authApi().setUnionName(this.session().getNickName());
+                    this.authApi().setUnionId(baseInfo.getUnionId());
+                    this.authApi().setOrgId(baseInfo.getOrgId());//获取orgid兼检测后台运行状况
+                    FrameController.instance().resetOrg(this.authApi().getOrgId(),this.authApi().getUnionName());
+                }
                 if (isStrEpmty(this.authApi().getOrgId())) {
                     System.out.printf("未获取到所属organization");
                     FrameController.instance().showTips("未获取到所属organization\n\n请检查后台是否连通,或检测您是否已注册为公司成员，5s后会重新尝试");
@@ -79,10 +84,10 @@ public class NaturaliBot extends WeChatBot {
     }
 
     /*GRPC with gateway start*/
-    private static String GATEWAY_HOST = "47.94.181.104";
-    private static int GATEWAY_PORT = 31934;
-//    private static String GATEWAY_HOST = "127.0.0.1";
-//    private static int GATEWAY_PORT = 40002;
+//    private static String GATEWAY_HOST = "47.94.181.104";
+//    private static int GATEWAY_PORT = 31934;
+    private static String GATEWAY_HOST = "127.0.0.1";
+    private static int GATEWAY_PORT = 40002;
 
     public void shutdown(ManagedChannel channel) throws InterruptedException {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
@@ -91,17 +96,16 @@ public class NaturaliBot extends WeChatBot {
     public void report(WeChatMessage message) {
         Wechatwebsite.Message request = Wechatwebsite.Message.newBuilder()
                 .setChatNickName(message.getFromNickName())
-                .setChatUserName(message.getFromUserName())
                 .setMineNickName(message.getMineNickName())
-                .setMineUserName(message.getMineUserName())
                 .setChatType(Wechatwebsite.Message.ChatType.RECEIVE)
                 .setMsgType(Wechatwebsite.Message.MsgType.TEXT)
                 .setOrgId(this.authApi().getOrgId())
+                .setUnionId(this.authApi().getUnionId())
                 .setText(message.getText()).build();
         ManagedChannel channel = ManagedChannelBuilder.forAddress(GATEWAY_HOST, GATEWAY_PORT)
                 .usePlaintext(true)
                 .build();
-        ChatbotGatewayGrpc.ChatbotGatewayBlockingStub  blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
+        ChatbotGatewayGrpc.ChatbotGatewayBlockingStub blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
         try {
             Wechatwebsite.Reply response = blockingStub.reportMessage(request);
             shutdown(channel);
@@ -113,13 +117,13 @@ public class NaturaliBot extends WeChatBot {
     public void request() {
         Wechatwebsite.BaseInfo baseInfo = Wechatwebsite.BaseInfo.newBuilder()
                 .setMineNickName(this.session().getNickName())
-                .setMineUserName(this.session().getUserName())
                 .setOrgId(this.authApi().getOrgId())
+                .setUnionId(this.authApi().getUnionId())
                 .setAuthCode(this.authApi().getAuthCode()).build();
         ManagedChannel channel = ManagedChannelBuilder.forAddress(GATEWAY_HOST, GATEWAY_PORT)
                 .usePlaintext(true)
                 .build();
-        ChatbotGatewayGrpc.ChatbotGatewayBlockingStub  blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
+        ChatbotGatewayGrpc.ChatbotGatewayBlockingStub blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
         try {
             Wechatwebsite.Message response = blockingStub.requestMessage(baseInfo);
             if (response.getText() != null && response.getText() != "") {
@@ -132,24 +136,24 @@ public class NaturaliBot extends WeChatBot {
         }
     }
 
-    public String getOrgId() {
+    public Wechatwebsite.BaseInfo getOrgId() {
         Wechatwebsite.BaseInfo baseInfo = Wechatwebsite.BaseInfo.newBuilder()
                 .setMineNickName(this.session().getNickName())
-                .setMineUserName(this.session().getUserName())
                 .setOrgId("")
+                .setUnionId("")
                 .setAuthCode(this.authApi().getAuthCode()).build();
         ManagedChannel channel = ManagedChannelBuilder.forAddress(GATEWAY_HOST, GATEWAY_PORT)
                 .usePlaintext(true)
                 .build();
-        ChatbotGatewayGrpc.ChatbotGatewayBlockingStub  blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
+        ChatbotGatewayGrpc.ChatbotGatewayBlockingStub blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
         try {
             Wechatwebsite.BaseInfo reply = blockingStub.getOrgId(baseInfo);
             shutdown(channel);
-            return reply.getOrgId();
+            return reply;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "";
+        return null;
     }
 
     public static void main(String[] args) {

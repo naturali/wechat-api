@@ -49,11 +49,13 @@ public class FrameController {
         label.setBounds(0, 0, 600, 600);
         frame.add(label, BorderLayout.CENTER);
 
-        button = new JButton("ResetOrg:");
+        button = new JButton("ClearCache:");
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String file = naturaliBot.config().assetsDir() + "/loginAuth.json";
                 new File(file).delete();
+                String file1 = naturaliBot.config().assetsDir() + "/login.json";
+                new File(file1).delete();
                 System.exit(0);
             }
         });
@@ -88,8 +90,8 @@ public class FrameController {
         frame.setVisible(true);
     }
 
-    public void resetOrg(String orgID){
-        button.setText("ResetOrg:" + orgID);
+    public void resetOrg(String orgID,String nickName){
+        button.setText("ClearCache:" + orgID+","+nickName);
     }
 
 }
