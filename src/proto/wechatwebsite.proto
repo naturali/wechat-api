@@ -5,8 +5,12 @@ package websitegateway;
 // wechat website with gate way
 service ChatbotGateway {
     rpc ReportMessage(Message) returns (Reply);
-    rpc RequestMessage(BaseInfo) returns (Message);//for 轮询
+    rpc RequestMessage(BaseInfo) returns (MessageList);//for 轮询
     rpc GetOrgId (BaseInfo) returns (BaseInfo);
+}
+
+message MessageList {
+    repeated Message messageList = 1;
 }
 
 message Message {
