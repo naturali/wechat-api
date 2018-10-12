@@ -19,6 +19,7 @@ import websitegateway.Wechatwebsite;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Handler;
 
 
 public class NaturaliBot extends WeChatBot {
@@ -46,7 +47,7 @@ public class NaturaliBot extends WeChatBot {
     protected void other() {
 //        super.other();
         while (true) {
-            DateUtils.sleep(800);
+            DateUtils.sleep(1000);
             if (isStrEpmty(this.session().getNickName()) || isStrEpmty(this.session().getNickName())) {
                 System.out.printf("website登陆失败");
                 FrameController.instance().showTips("website登陆失败");
@@ -65,7 +66,7 @@ public class NaturaliBot extends WeChatBot {
                     this.authApi().setUnionName(this.session().getNickName());
                     this.authApi().setUnionId(baseInfo.getUnionId());
                     this.authApi().setOrgId(baseInfo.getOrgId());//获取orgid兼检测后台运行状况
-                    FrameController.instance().resetOrg(this.authApi().getOrgId(),this.authApi().getUnionName());
+                    FrameController.instance().resetOrg(this.authApi().getOrgId(), this.authApi().getUnionName());
                 }
                 if (isStrEpmty(this.authApi().getOrgId())) {
                     System.out.printf("未获取到所属organization");
@@ -124,16 +125,26 @@ public class NaturaliBot extends WeChatBot {
                 .usePlaintext(true)
                 .build();
         ChatbotGatewayGrpc.ChatbotGatewayBlockingStub blockingStub = ChatbotGatewayGrpc.newBlockingStub(channel);
-        try {
-            Wechatwebsite.Message response = blockingStub.requestMessage(baseInfo);
-            if (response.getText() != null && response.getText() != "") {
-                boolean success = this.sendMsg(this.getUserIdByNick(response.getChatNickName()), response.getText());
-                FrameController.instance().showTips("发送给 [" + response.getChatNickName() + "] 的消息: {" + response.getText() + "}," + success);
+        Wechatwebsite.MessageList response = blockingStub.requestMessage(baseInfo);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                for (Wechatwebsite.Message message : response.getMessageListList()) {
+                    if (message.getText() != null && message.getText() != "") {
+                        boolean success = NaturaliBot.this.sendMsg(NaturaliBot.this.getUserIdByNick(message.getChatNickName()), message.getText());
+                        FrameController.instance().showTips("发送给 [" + message.getChatNickName() + "] 的消息: {" + message.getText() + "}," + success);
+                    }
+                    DateUtils.sleep(250);
+                }
+                try {
+                    shutdown(channel);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-            shutdown(channel);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        };
+        Thread thread = new Thread(runnable);
+        thread.start();
     }
 
     public Wechatwebsite.BaseInfo getOrgId() {
