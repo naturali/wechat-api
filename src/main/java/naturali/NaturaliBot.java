@@ -8,18 +8,16 @@ package naturali;
 import io.github.biezhi.wechat.WeChatBot;
 import io.github.biezhi.wechat.api.annotation.Bind;
 import io.github.biezhi.wechat.api.constant.Config;
+import io.github.biezhi.wechat.api.enums.AccountType;
 import io.github.biezhi.wechat.api.enums.MsgType;
 import io.github.biezhi.wechat.api.model.WeChatMessage;
 import io.github.biezhi.wechat.utils.DateUtils;
-import io.github.biezhi.wechat.utils.StringUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import websitegateway.ChatbotGatewayGrpc;
 import websitegateway.Wechatwebsite;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Handler;
 
 
 public class NaturaliBot extends WeChatBot {
@@ -38,10 +36,9 @@ public class NaturaliBot extends WeChatBot {
 //        } else {
 //            this.sendMsg(message.getFromUserName(), "自动回复new add: " + message.getText());
 //        }
-        report(message);
+//        report(message);
 
     }
-
 
     @Override
     protected void other() {
