@@ -8,18 +8,16 @@ package naturali;
 import io.github.biezhi.wechat.WeChatBot;
 import io.github.biezhi.wechat.api.annotation.Bind;
 import io.github.biezhi.wechat.api.constant.Config;
+import io.github.biezhi.wechat.api.enums.AccountType;
 import io.github.biezhi.wechat.api.enums.MsgType;
 import io.github.biezhi.wechat.api.model.WeChatMessage;
 import io.github.biezhi.wechat.utils.DateUtils;
-import io.github.biezhi.wechat.utils.StringUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import websitegateway.ChatbotGatewayGrpc;
 import websitegateway.Wechatwebsite;
 
-import java.io.File;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Handler;
 
 
 public class NaturaliBot extends WeChatBot {
@@ -39,9 +37,7 @@ public class NaturaliBot extends WeChatBot {
 //            this.sendMsg(message.getFromUserName(), "自动回复new add: " + message.getText());
 //        }
         report(message);
-
     }
-
 
     @Override
     protected void other() {
@@ -85,10 +81,10 @@ public class NaturaliBot extends WeChatBot {
     }
 
     /*GRPC with gateway start*/
-//    private static String GATEWAY_HOST = "47.94.181.104";
-//    private static int GATEWAY_PORT = 31934;
-    private static String GATEWAY_HOST = "127.0.0.1";
-    private static int GATEWAY_PORT = 40002;
+    private static String GATEWAY_HOST = "47.94.181.104";
+    private static int GATEWAY_PORT = 31934;
+//    private static String GATEWAY_HOST = "127.0.0.1";
+//    private static int GATEWAY_PORT = 40002;
 
     public void shutdown(ManagedChannel channel) throws InterruptedException {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);

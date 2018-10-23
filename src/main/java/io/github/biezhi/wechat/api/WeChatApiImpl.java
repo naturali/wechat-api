@@ -154,6 +154,7 @@ public class WeChatApiImpl implements WeChatApi {
                 }
             }
         }
+        FrameController.instance().showTips("获取联系人列表，请稍等");
         onLogin();
     }
 
@@ -178,6 +179,7 @@ public class WeChatApiImpl implements WeChatApi {
 
     @Override
     public void loginForce() {
+        if (this.logging) return;
         this.logging = true;
         while (logging) {
             this.uuid = null;
@@ -583,6 +585,46 @@ public class WeChatApiImpl implements WeChatApi {
     }
 
     /**
+     * 加载单个群信息（some group may be dropped off when load all contact）
+     */
+    public Account loadSingleGroup(String groupUserID) {
+        System.out.print("加载单个群信息");
+        groupUserNames.add(groupUserID);
+        // 群账号
+        List<Map<String, String>> list = new ArrayList<>(1);
+        Map<String, String> map = new HashMap<>(2);
+        map.put("UserName", groupUserID);
+        map.put("EncryChatRoomId", "");
+        list.add(map);
+
+        String url = String.format("%s/webwxbatchgetcontact?type=ex&r=%s&pass_ticket=%s",
+                bot.session().getUrl(), System.currentTimeMillis() / 1000, bot.session().getPassTicket());
+
+        // 加载群信息
+        JsonResponse jsonResponse = this.client.send(new JsonRequest(url).post().jsonBody()
+                .add("BaseRequest", bot.session().getBaseRequest())
+                .add("Count", list.size())
+                .add("List", list)
+        );
+
+        List<Account> newGroupList = WeChatUtils.fromJson(WeChatUtils.toJson(jsonResponse.toJsonObject().getAsJsonArray("ContactList")), new TypeToken<List<Account>>() {
+        });
+        if (newGroupList == null || newGroupList.size() == 0) {
+            return null;
+        }
+        Account account = newGroupList.get(0);
+        groupUserNames.add(groupUserID);
+        this.groupList.add(account);
+        if (null != account.getUserName()) {
+            accountMap.put(account.getUserName(), account);
+        }
+        if (null != account.getNickName()) {
+            accountNickMap.put(account.getNickName(), account);
+        }
+        return account;
+    }
+
+    /**
      * 根据UserName查询Account
      *
      * @param id 用户UserName唯一标识
@@ -790,6 +832,9 @@ public class WeChatApiImpl implements WeChatApi {
         if (null != contactList && contactList.size() > 0) {
             for (Account account : contactList) {
                 accountMap.put(account.getUserName(), account);
+                if (null != account.getNickName()) {
+                    accountNickMap.put(account.getNickName(), account);
+                }
             }
         }
     }
@@ -867,6 +912,12 @@ public class WeChatApiImpl implements WeChatApi {
                 .text(content);
 
         Account fromAccount = this.getAccountById(message.getFromUserName());
+        if (message.getFromUserName() != null && message.getFromUserName().contains("@@") && null == fromAccount) {
+            fromAccount = loadSingleGroup(message.getFromUserName());
+        }else {
+            this.loadContact(0);
+            fromAccount = this.getAccountById(message.getFromUserName());
+        }
         if (null == fromAccount) {
             System.out.print("消息类型: {" + message.msgType() + "}");
             System.out.print("消息主体: {" + WeChatUtils.toPrettyJson(message) + "}");
