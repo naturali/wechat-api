@@ -37,7 +37,7 @@ public class ChatLoop implements Runnable {
             try {
                 SyncCheckRet syncCheckRet = api.syncCheck();
                 if (syncCheckRet.getRetCode() == UNKNOWN) {
-                    FrameController.instance().showTips("未知状态");
+                    FrameController.instance().showTips("on line");
                     log.info("未知状态");
                     continue;
                 } else if (syncCheckRet.getRetCode() == MOBILE_LOGIN_OUT) {

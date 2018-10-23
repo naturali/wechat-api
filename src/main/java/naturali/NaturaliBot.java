@@ -36,8 +36,7 @@ public class NaturaliBot extends WeChatBot {
 //        } else {
 //            this.sendMsg(message.getFromUserName(), "自动回复new add: " + message.getText());
 //        }
-//        report(message);
-
+        report(message);
     }
 
     @Override
@@ -82,10 +81,10 @@ public class NaturaliBot extends WeChatBot {
     }
 
     /*GRPC with gateway start*/
-//    private static String GATEWAY_HOST = "47.94.181.104";
-//    private static int GATEWAY_PORT = 31934;
-    private static String GATEWAY_HOST = "127.0.0.1";
-    private static int GATEWAY_PORT = 40002;
+    private static String GATEWAY_HOST = "47.94.181.104";
+    private static int GATEWAY_PORT = 31934;
+//    private static String GATEWAY_HOST = "127.0.0.1";
+//    private static int GATEWAY_PORT = 40002;
 
     public void shutdown(ManagedChannel channel) throws InterruptedException {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);

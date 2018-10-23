@@ -914,6 +914,9 @@ public class WeChatApiImpl implements WeChatApi {
         Account fromAccount = this.getAccountById(message.getFromUserName());
         if (message.getFromUserName() != null && message.getFromUserName().contains("@@") && null == fromAccount) {
             fromAccount = loadSingleGroup(message.getFromUserName());
+        }else {
+            this.loadContact(0);
+            fromAccount = this.getAccountById(message.getFromUserName());
         }
         if (null == fromAccount) {
             System.out.print("消息类型: {" + message.msgType() + "}");
